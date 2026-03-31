@@ -1,38 +1,33 @@
-# agent-skills
+# Personal AI Agent Skills Catalog
 
-Personal collection of AI agent skills and adaptations for various platforms.
+A canonical source of truth for my personal AI agent skills. This is a **Monorepo Catalog** designed for one-click installation across all agent environments (Google Gemini Antigravity, Claude Code, Cursor/Cline).
 
-Skills in this repo work with the [~/.agents/skills/](https://github.com/kingbootoshi/codex-orchestrator) convention — drop a folder with a `SKILL.md` into `~/.agents/skills/` (or the platform-specific path) and any supporting agent picks it up.
+All skills follow the [Anthropic Skill Authoring Guidelines](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) (Conciseness, Progressive Disclosure, Exacting Triggers).
 
-## Skills
+## Available Skills
 
-### [`codex-orchestrator-antigravity`](./skills/codex-orchestrator-antigravity/)
+| Skill | Description | Upstream Source |
+|-------|-------------|-----------------|
+| **`bird`** | Twitter/X CLI integration. Read timelines, search, and safely execute write actions with preflight Safari auth fallbacks. | [bird-skill](https://github.com/zaydiscold/bird-skill) |
+| **`last365days`** | A persistent research tracker. Searches Reddit, X, YouTube, TikTok, Polymarket, and the web, and compiles a running historical timeline per topic. | [last365days-skill](https://github.com/zaydiscold/last365days-skill) |
+| **`nasa-coding-standards`** | Complete auditor and auto-refactor agent for NASA JPL's "Power of 10" safety-critical coding rules (supports C/C++ and interpreted languages). | [nasa-coding-standards-skill](https://github.com/zaydiscold/nasa-coding-standards-skill) |
+| **`codex-orchestrator-antigravity`** | Antigravity wrapper for `codex-orchestrator`. Spawns parallel Codex read/write agents via tmux to handle entire product pipelines. | [codex-orchestrator-antigravity-skill](https://github.com/zaydiscold/codex-orchestrator-antigravity-skill) |
 
-**Adapts [kingbootoshi/codex-orchestrator](https://github.com/kingbootoshi/codex-orchestrator) for Google Gemini Antigravity.**
+## Quick Install across all platforms
 
-The original is a Claude Code plugin. This skill makes it work in Antigravity's skill system.
-
-**Key difference:** Antigravity's `run_command` tool spawns fresh shell sessions that don't inherit PATH — every `codex-agent` call is prefixed with `export PATH="$HOME/.codex-orchestrator/bin:$PATH" &&` to fix this.
-
-Full docs in the skill folder.
-
-## Install a Skill
+Clone this repo once, and the included script will symlink the entire catalog to all 3 agent platforms simultaneously.
 
 ```bash
-# Clone this repo
 git clone https://github.com/zaydiscold/agent-skills.git ~/Desktop/agent-skills
-
-# Symlink or copy a skill to your agents skills dir
-cp -r ~/Desktop/agent-skills/skills/codex-orchestrator-antigravity ~/.agents/skills/
-cp -r ~/Desktop/agent-skills/skills/codex-orchestrator-antigravity ~/.gemini/antigravity/skills/
+cd ~/Desktop/agent-skills
+bash docs/install-skills.txt
 ```
 
-## Platform Support
+This will automatically link to:
+- `~/.agents/skills/` (Base tracking for Cursor)
+- `~/.claude/skills/` (Claude Code)
+- `~/.gemini/antigravity/skills/` (Google Gemini Antigravity)
 
-| Skill | Claude Code | Antigravity/Gemini | Cursor | Notes |
-|-------|:-----------:|:-----------------:|:------:|-------|
-| codex-orchestrator-antigravity | ❌ | ✅ | ❌ | Use original plugin for Claude Code |
+## Why a Monorepo?
 
-## Contributing
-
-PRs welcome. If you've adapted a tool or skill for a specific agent platform, this is a good place to share it.
+While skills are individually developed and maintained in their standalone Repositories (for clean independent sharing), they are aggregated here. This ensures that a new Macbook can instantly inherit all intelligence capabilities via a single git clone.

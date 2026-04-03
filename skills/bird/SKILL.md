@@ -1,9 +1,15 @@
 ---
 name: bird
 description: Use when the user shares an x.com or twitter.com URL, asks to read/search tweets, check mentions or timelines, or perform tweet actions via bird CLI.
+triggers:
+  - twitter
+  - x.com
+  - tweet
+  - tweets
+  - bird
 metadata:
   author: zaydk
-  version: 1.1.2
+  version: 1.1.3
 ---
 
 # Bird — Twitter/X CLI

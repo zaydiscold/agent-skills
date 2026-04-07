@@ -3,7 +3,7 @@ name: nasa-coding-standards
 description: Enforce NASA JPL "Power of 10" safety-critical coding rules on C/C++, Python, JS, TS, or Go code. Use when user says "apply nasa rules", "check power of 10", "nasa coding standards", "safety-critical audit", or "verify code reliability". Do NOT use for general code review without safety-critical context.
 metadata:
   author: zaydk
-  version: 1.2.0
+  version: 1.3.0
   upstream: https://github.com/zaydk/nasa-coding-standards
   compatibility: "Works with any code language. References optimized for C/C++ and interpreted languages (Python/JS/TS/Go)."
 ---
@@ -21,6 +21,12 @@ Apply NASA JPL's "Power of 10" rules for safety-critical, verifiable, reliable s
 | 3 | Audit all 10 rules | Violation table |
 | 4 | Refactor code | Compliant version |
 | 5 | Summarize changes | Impact by rule |
+
+## Problem-First Framing
+
+This skill is **problem-first**: User describes outcome ("make this code safe for embedded use"), skill handles the tool (NASA rule enforcement). Users never specify which rules to check — you apply all 10 rules systematically.
+
+User intent → Language detection → Rule reference selection → Full audit → Refactor → Summary.
 
 ## Reference Navigation
 
@@ -78,25 +84,113 @@ Bulleted list of changes grouped by rule. Focus on why changes improve safety, n
 
 ### Audit C code
 User: "Apply NASA rules to this embedded driver"
+
+**Step 1: Identify language & load rules**
+```
+Language: C
+Loading: references/rules-c.md
+```
+
+**Step 2: Audit with violation table**
+```markdown
+| # | Rule | Location | Violation | Severity |
+|---|------|----------|-----------|----------|
+| 1 | R1 | driver.c:23 | malloc() used in init | CRITICAL |
+| 2 | R2 | driver.c:45 | while loop without fixed bound | CRITICAL |
+| 3 | R5 | utils.c:12 | recursive error handler | HIGH |
+
+Compliance: 7/10 rules passed (70%)
+```
+
+**Step 3: Refactored output**
 ```c
-// Input: driver.c with dynamic allocation
-// Output: Violation table + refactored code with static allocation
-// R1-R10 check, R1 violation found (malloc used), fixed with fixed-size pool
+// NASA R1: Static allocation only — fixed-size buffer pool
+static uint8_t buffer_pool[DRIVER_BUFFER_COUNT][BUFFER_SIZE];
+
+// NASA R2: All loops must have fixed bounds
+for (int i = 0; i < MAX_RETRIES; i++) {  // Fixed: explicit bound
+    // ...
+}
+
+// NASA R5: No recursion — converted to iteration
+void handle_error(int code) {
+    // Iterative error handling stack
+    while (code != 0) { ... }
+}
+```
+
+**Step 4: Impact summary**
+```
+Changes by rule:
+- R1: Replaced malloc with static pool (prevents memory fragmentation)
+- R2: Added explicit loop bounds (prevents infinite loops)
+- R5: Converted recursion to iteration (prevents stack overflow)
 ```
 
 ### Audit Python script
 User: "Check my Python against power of 10"
+
+**Input:** data_processor.py
 ```python
-# Input: data_processor.py
-# Output: R3 violation (function >60 lines), R5 violation (recursion)
-# Refactored: split functions, converted recursion to iteration
+def process(data):
+    if len(data) > 1:
+        return process(data[:len(data)//2]) + process(data[len(data)//2:])  # R5 violation: recursion
+    return data[0]
+
+def main():
+    # 120 lines of code here...  # R3 violation: function too long
+    pass
+```
+
+**Output:**
+```markdown
+| # | Rule | Location | Violation | Severity |
+|---|------|----------|-----------|----------|
+| 3 | R3 | main() | 120 lines (>60 limit) | HIGH |
+| 5 | R5 | process() | Unbounded recursion | HIGH |
+
+Compliance: 8/10 rules passed (80%)
+```
+
+**Refactored:**
+```python
+def process(data):
+    # NASA R5: Converted to iteration
+    stack = [data]
+    result = 0
+    while stack:
+        current = stack.pop()
+        if len(current) > 1:
+            stack.extend(split(current))
+        else:
+            result += current[0]
+    return result
+
+def main():
+    setup()  # NASA R3: Split into sub-functions
+    process_data()
+    cleanup()
 ```
 
 ### Verify compliance
 User: "Does this code meet NASA standards?"
-```
-# Full audit, if 10/10 pass:
-# "All 10 rules passed. Code meets NASA JPL safety-critical standards."
+
+**Full audit result:**
+```markdown
+| # | Rule | Status | Notes |
+|---|------|--------|-------|
+| 1 | R1 | ✓ PASS | No dynamic allocation |
+| 2 | R2 | ✓ PASS | All loops bounded |
+| 3 | R3 | ✓ PASS | All functions <60 lines |
+| 4 | R4 | ✓ PASS | No function pointers |
+| 5 | R5 | ✓ PASS | No recursion |
+| 6 | R6 | ✓ PASS | Data flow checked |
+| 7 | R7 | ✓ PASS | All returns checked |
+| 8 | R8 | ✓ PASS | Limited preprocessor use |
+| 9 | R9 | ✓ PASS | Pointers limited |
+| 10 | R10 | ✓ PASS | No standard warnings |
+
+Result: **All 10 rules passed. Code meets NASA JPL safety-critical standards.**
 ```
 
 ## Troubleshooting

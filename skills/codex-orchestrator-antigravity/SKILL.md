@@ -3,7 +3,7 @@ name: codex-orchestrator-antigravity
 description: Orchestrate OpenAI Codex CLI agents via tmux sessions for parallel coding tasks. Use when user says "spawn codex", "delegate to codex", "codex agent", "parallel coding", or for complex multi-step coding that benefits from agent swarm execution. Do NOT use for simple single-file edits or when user explicitly wants a different agent.
 metadata:
   author: zaydk
-  version: 1.2.0
+  version: 1.3.0
   upstream: https://github.com/kingbootoshi/codex-orchestrator
   compatibility: "Requires codex-orchestrator CLI installed. Uses tmux, bun, and OpenAI Codex CLI."
 ---
@@ -115,40 +115,99 @@ For complex tasks. User = approver, Codex = engineering team.
 
 ### Simple research task
 User: "Find all uses of the auth function in our codebase"
+
+**Spawn**
 ```bash
-# Spawn
 export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
   codex-agent start "Find all uses of auth function, list file:line" -r high -s read-only
-# Await, read, present findings
+# Returns: <jobId> c9f2a1b8...
+```
+
+**Await**
+```bash
+export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
+  codex-agent await-turn c9f2a1b8
+# Blocks until agent completes
+```
+
+**Read output**
+```bash
+export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
+  codex-agent status c9f2a1b8
+
+# Output:
+# Found 12 uses of auth():
+# - src/auth.js:45  — login handler
+# - src/middleware.js:23 — token validation
+# - src/api/users.js:78 — password reset
+# ...
 ```
 
 ### Parallel investigation
 User: "Audit the codebase for security issues"
-```bash
-# Spawn 3 agents in parallel
-JOB1=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "Check auth flows" -s read-only)
-JOB2=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "Check SQL injection risks" -s read-only)
-JOB3=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "Check XSS in frontend" -s read-only)
 
-# Await all
+**Spawn 3 agents in parallel**
+```bash
+JOB1=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "Check auth flows for JWT issues" -s read-only)
+JOB2=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "Check SQL injection risks in query builders" -s read-only)
+JOB3=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "Check XSS in frontend templates" -s read-only)
+
+echo "Jobs spawned: $JOB1 $JOB2 $JOB3"
+```
+
+**Await all**
+```bash
 for JOB in $JOB1 $JOB2 $JOB3; do
   export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent await-turn $JOB
 done
-# Synthesize all findings
+echo "All security audits complete"
+```
+
+**Synthesize findings**
+```
+Combined Security Report:
+- Auth: 2 MEDIUM (weak JWT signing, missing refresh rotation)
+- SQL: 1 CRITICAL (unsanitized input in admin panel)
+- XSS: 0 issues found
 ```
 
 ### Factory implementation
 User: "Build a user authentication system"
+
+**Phase 2: Research**
 ```bash
-# Phase 2: Research
 JOB=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
   codex-agent start "Research auth patterns in this codebase" -r high --map -s read-only)
 export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent await-turn $JOB
 
-# Phase 3: You write PRD, get approval
-# Phase 4: Implementation
+# Read research results
+codex-agent status $JOB > research.md
+# Validation: ≥3 distinct findings ✓
+```
+
+**Phase 3: PRD (You)**
+```markdown
+# docs/prds/auth.md
+Based on research findings...
+[Write PRD, get user approval]
+```
+
+**Phase 4: Implementation**
+```bash
 JOB=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
   codex-agent start "Implement auth per PRD docs/prds/auth.md" -s workspace-write)
+export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent await-turn $JOB
+
+# Validation: Code compiles, tests run
+```
+
+**Phase 5: Review**
+```bash
+JOB=$(export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
+  codex-agent start "Security review of auth implementation" -s read-only)
+export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent await-turn $JOB
+
+# Validation: No CRITICAL security issues ✓
 ```
 
 ## Troubleshooting

@@ -3,7 +3,7 @@ name: universal-insights
 description: Generate cross-agent analytics and insights reports from AI coding sessions. Use when user says "/insights", "analyze my agent usage", "claude stats", "cursor insights", or requests analytics on their AI coding patterns across Claude Code, Cursor, Codex, Gemini, or Antigravity.
 metadata:
   author: zaydk
-  version: 1.0.0
+  version: 1.1.0
   upstream: https://github.com/zaydk/universal-insights
   compatibility: "Node.js 18+ required. Reads from ~/.claude, ~/.cursor, ~/.codex, ~/.gemini directories."
 ---
@@ -123,26 +123,67 @@ Parallel AI generation of 7 report sections:
 
 ### Default full report
 User: `/insights` or "analyze my agent usage"
+
+**Step 1: Parse intent** (user wants comprehensive HTML report, default format)
+
+**Step 2: Generate**
 ```bash
 cd ~/Desktop/agent-skills/universal-insights
 node generate-claude-report.cjs --format html --output ~/Desktop/insights-$(date +%Y%m%d).html
-echo "Report saved to ~/Desktop/insights-$(date +%Y%m%d).html"
+
+# Output:
+# Analyzing ~/.claude/projects/...
+# Found 24 sessions
+# Extracting facets... [████████████████████] 100%
+# Generating insights report...
+# Report saved to ~/Desktop/insights-20250407.html
+```
+
+**Step 3: Present to user**
+```
+Generated comprehensive insights report for Claude Code:
+• 24 sessions analyzed (last 90 days)
+• Success rate: 87% (21 achieved / 3 partial)
+• Top frustration: API rate limits during debugging
+• Report: file:///Users/zaydk/Desktop/insights-20250407.html
 ```
 
 ### Claude Code only
 User: "just my claude stats"
+
+**Parse intent:** specific agent (Claude), no format specified → default markdown for terminal readability
+
 ```bash
 node generate-claude-report.cjs --format md
+
+# Output:
+# # Claude Code Usage Report
+# ## At a Glance
+# - Sessions: 24
+# - Total time: ~18 hours
+# - Success rate: 87%
+# ...
 ```
 
 ### Last 7 days, markdown
 User: "weekly summary in markdown"
+
+**Parse intent:** time-constrained (7 days), format=md (for sharing/portability)
+
 ```bash
 node generate-claude-report.cjs --days 7 --format md --output ~/Desktop/weekly.md
+
+# Output:
+# Wrote: /Users/zaydk/Desktop/weekly.md
+# Sessions analyzed: 8
+# Date range: 2025-03-31 to 2025-04-07
 ```
 
 ### Compare all agents
 User: "compare my usage across all AI tools"
+
+**Parse intent:** cross-agent analysis, no format preference → HTML for visual comparison
+
 ```bash
 # Generate all reports
 node generate-claude-report.cjs --output ~/Desktop/claude-insights.html
@@ -150,8 +191,14 @@ node generate-cursor-insights.cjs --output ~/Desktop/cursor-insights.html
 node generate-codex-report.cjs --output ~/Desktop/codex-insights.html
 node generate-gemini-report.cjs --output ~/Desktop/gemini-insights.html
 
-echo "Cross-agent reports saved to ~/Desktop/"
-```
+# Output summary
+# Generated reports:
+# - Claude Code: 24 sessions, 87% success
+# - Cursor: 12 sessions, 75% success
+# - Codex: 8 sessions, 90% success
+# - Gemini: 3 sessions, 33% success
+#
+# Cross-agent reports saved to ~/Desktop/
 
 ## Troubleshooting
 

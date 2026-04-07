@@ -3,7 +3,7 @@ name: last365days
 description: Persistent long-term research tracker that builds dated Markdown timelines for topics/people. Use when user says "track this over time", "research timeline", "last365", "persistent profile", "save research history", or requests multi-session tracking on a topic. Do NOT use for one-off quick searches without persistence.
 metadata:
   author: zaydk
-  version: 1.3.0
+  version: 1.4.0
   upstream: https://github.com/zaydk/last365days
   compatibility: "Requires Python 3.10+. Uses last30days.py as research engine."
 ---
@@ -119,24 +119,71 @@ SYNTHESIS_EOF
 ## Examples
 
 ### Track a company over time
-User: `last365days Anthropic`
+User: `research Anthropic and save it`
 ```bash
-# Match topic → Run research → Synthesize → Append to Anthropic.md
-# Output: "What changed since 2025-03-15 [last research date]"
+# Step 1: Match topic
+python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py match "Anthropic"
+# Result: exact match found → loading Anthropic.md history
+
+# Step 2: Run research with last30days
+LAST30DAYS_OUTPUT_DIR="${LAST365DAYS_OUTPUT_DIR:-$HOME/.local/share/last365days/out}" \
+python3 "${CLAUDE_SKILL_DIR}/scripts/last30days.py" "Anthropic" --emit=compact --no-native-web
+
+# Step 3: Synthesize and append
+cat << 'EOF' | python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py append "anthropic" --title "Anthropic"
+## 2025-04-07 Research Update
+
+### What Changed Since 2025-03-15
+- New: Claude 3.7 Sonnet released with extended thinking
+- Update: Computer use API now generally available
+
+### Key Findings
+1. Launched "research mode" with 64k token extended thinking
+2. MCP protocol adoption accelerating across AI tools
+3. New pricing tiers for high-volume API users
+
+### Patterns
+- Release cycle accelerating (quarterly major updates)
+- Developer tooling prioritized over consumer features
+EOF
+
+# Output to user: "Updated anthropic.md — 4 new findings since March 15"
 ```
 
 ### Research a person
 User: `track research on Simon Willison`
 ```bash
-# Creates/updates simon-willison.md
-# Shows timeline: "First researched 2025-01-10, updated 3 times"
+# Match: "simon-willison" not found → creating new profile
+
+# Run research
+python3 "${CLAUDE_SKILL_DIR}/scripts/last30days.py" "Simon Willison" --emit=compact
+
+# Create profile
+cat << 'EOF' | python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py append "simon-willison" --title "Simon Willison"
+## 2025-04-07 — First Research
+
+### Key Findings
+1. Released datasette-lite 0.3 with WASM improvements
+2. Blogging about LLM tokenization edge cases
+3. New tool: llm-fragments for context window management
+
+### Patterns
+- Consistent weekly blog posts on niche technical topics
+- Tools focused on data exploration and LLM interaction
+EOF
+
+# Output: "Created simon-willison.md — will track updates over time"
 ```
 
 ### List what you're tracking
 User: `what topics am I tracking?`
 ```bash
 python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py list
-# Shows all profiles with last-updated dates
+
+# Output:
+# 1. anthropic — Last updated: 2025-04-07 (5 entries total)
+# 2. simon-willison — Last updated: 2025-04-07 (1 entry)
+# 3. openai — Last updated: 2025-03-28 (3 entries total)
 ```
 
 ## Troubleshooting

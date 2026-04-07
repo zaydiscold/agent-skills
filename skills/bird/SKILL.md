@@ -147,7 +147,7 @@ See `references/write-actions.md` for complete protocol.
 
 ## Reference Navigation
 
-For detailed documentation, consult (only load when needed):
-- `references/search-operators.md` — Search syntax and filters
-- `references/write-actions.md` — Tweeting, replying, and following (confirmation required)
-- `references/troubleshooting.md` — Error remediation and auth issues
+**Load only when needed** — these are detailed references, not required for basic operation:
+- `references/search-operators.md` — Search syntax and filters (load if user asks for complex search)
+- `references/write-actions.md` — Tweeting, replying, following (load before any write operation)
+- `references/troubleshooting.md` — Detailed error remediation (load if auth or errors persist)

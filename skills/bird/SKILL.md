@@ -1,6 +1,6 @@
 ---
 name: bird
-description: Read tweets, search, and browse Twitter/X timelines via bird CLI. Use when user shares x.com/twitter.com URLs, asks to "read tweet", "search twitter", "check mentions", "timeline", "bird", or any tweet-related actions. Do NOT use for general web browsing or non-Twitter sites.
+description: Use when user shares x.com/twitter.com URLs, asks to "read tweet", "search twitter", "check mentions", "timeline", "bird", or any tweet-related actions. Read tweets, search, and browse Twitter/X timelines via bird CLI. Do NOT use for general web browsing or non-Twitter sites.
 metadata:
   author: zaydk
   version: 1.2.0
@@ -23,24 +23,38 @@ Read tweets, search, and browse timelines directly via `bird` CLI using Bash. Al
 | Feed | `bird home` |
 | User Timeline | `bird user @handle` |
 
-## Reference Navigation
+## Examples
 
-For detailed documentation, consult (only load when needed):
-- `references/search-operators.md` — Search syntax and filters
-- `references/write-actions.md` — Tweeting, replying, and following (confirmation required)
-- `references/troubleshooting.md` — Error remediation and auth issues
+### Read a tweet
+User: "Check this tweet https://x.com/elonmusk/status/123456"
+```bash
+bird read "https://x.com/elonmusk/status/123456"
+```
 
-## Core Behavior
+### Search with operators
+User: "Search twitter for AI announcements from OpenAI this week"
+```bash
+bird search "from:OpenAI AI announcement since:2025-04-01" -n 15
+```
 
-- **ALWAYS use `bird` CLI directly** with Bash/terminal. Do NOT use browser tools or WebFetch for Twitter content.
-- Keep behavior deterministic: run one command, report output.
-- Prefer concise summaries unless raw output explicitly requested.
-- **NEVER fabricate tweet content**. Only report exactly what `bird` returns.
-- Write actions (`tweet`, `reply`, `follow`, `unbookmark`) require explicit user confirmation per `references/write-actions.md`.
+### Read full thread
+User: "Show me the whole thread"
+```bash
+bird thread "https://x.com/handle/status/123456"
+```
 
-## Problem-First vs Tool-First Framing
+### Check mentions
+User: "Do I have any twitter notifications?"
+```bash
+bird mentions -n 10
+```
 
-This skill is **problem-first**: User describes outcome ("check this tweet"), skill handles the tool (`bird read`). Users never need to know `bird` exists — you translate their intent to CLI commands.
+### Post a tweet (requires confirmation)
+User: "Tweet 'Hello world'"
+```
+I will run: `bird tweet "Hello world"`
+Proceed? (yes/no)
+```
 
 ## Sequential Workflow: Execute Bird Command
 
@@ -107,33 +121,6 @@ CRITICAL - Validate URLs before processing:
 - **Strip tracking**: `utm_*`, `s`, `ref`, `t` query params
 - **Reject early**: Non-Twitter URLs with clear error message
 
-## Examples
-
-### Read a tweet
-User: "Check this tweet https://x.com/elonmusk/status/123456"
-```bash
-bird read "https://x.com/elonmusk/status/123456"
-```
-
-### Search with operators
-User: "Search twitter for AI announcements from OpenAI this week"
-```bash
-bird search "from:OpenAI AI announcement since:2025-04-01" -n 15
-```
-*See `references/search-operators.md` for full query syntax*
-
-### Read full thread
-User: "Show me the whole thread"
-```bash
-bird thread "https://x.com/handle/status/123456"
-```
-
-### Check mentions
-User: "Do I have any twitter notifications?"
-```bash
-bird mentions -n 10
-```
-
 ## Troubleshooting
 
 | Error | Cause | Solution |
@@ -144,6 +131,7 @@ bird mentions -n 10
 | `private/protected` | Account requires permission | Explain limitation, suggest following |
 | `Safari vs Chrome mismatch` | Cookie source changed | Use `--chrome-profile` flag |
 | `exec: bird not found` | CLI not installed | Run auto-install from Preflight |
+| `error 226` | x-client-transaction-id invalid | Update to bird v0.8.0+ |
 
 ## Write-Action Confirmation Protocol
 
@@ -156,3 +144,10 @@ For `tweet`, `reply`, `follow`, `unbookmark`:
 5. **On `no`**: Stop, ask for revised intent
 
 See `references/write-actions.md` for complete protocol.
+
+## Reference Navigation
+
+For detailed documentation, consult (only load when needed):
+- `references/search-operators.md` — Search syntax and filters
+- `references/write-actions.md` — Tweeting, replying, and following (confirmation required)
+- `references/troubleshooting.md` — Error remediation and auth issues

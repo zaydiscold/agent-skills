@@ -3,7 +3,7 @@ name: codex-orchestrator-antigravity
 description: Orchestrate OpenAI Codex CLI agents via tmux sessions for parallel coding tasks. Use when user says "spawn codex", "delegate to codex", "codex agent", "parallel coding", or for complex multi-step coding that benefits from agent swarm execution. Do NOT use for simple single-file edits or when user explicitly wants a different agent.
 metadata:
   author: zaydk
-  version: 1.3.0
+  version: 1.3.1
   upstream: https://github.com/kingbootoshi/codex-orchestrator
   compatibility: "Requires codex-orchestrator CLI installed. Uses tmux, bun, and OpenAI Codex CLI."
 ---
@@ -35,8 +35,14 @@ export PATH="$HOME/.codex-orchestrator/bin:$PATH" && codex-agent start "task" -s
 
 ## Reference Navigation
 
-- `references/commands.md` — Full flags, timing, JSON schemas, error recovery
-- `references/install.md` — Installation and health check
+**Load only when needed** — reference files contain extended documentation.
+
+| Reference | Load When |
+|-----------|-----------|
+| `references/commands.md` | Need full flags, JSON schemas, error recovery details |
+| `references/install.md` | Installation issues or health check debugging |
+
+**Core workflow and all commands are in this SKILL.md. References are for troubleshooting/extended docs only.**
 
 ## Core Orchestration Loop
 

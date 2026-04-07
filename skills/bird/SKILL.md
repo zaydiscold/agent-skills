@@ -3,7 +3,7 @@ name: bird
 description: Use when user shares x.com/twitter.com URLs, asks to "read tweet", "search twitter", "check mentions", "timeline", "bird", or any tweet-related actions. Read tweets, search, and browse Twitter/X timelines via bird CLI. Do NOT use for general web browsing or non-Twitter sites.
 metadata:
   author: zaydk
-  version: 1.2.0
+  version: 1.3.0
   upstream: https://github.com/zaydiscold/bird
   compatibility: "Requires bird CLI 0.8.0+. macOS/Linux with Safari or Chrome cookies."
 ---
@@ -58,11 +58,11 @@ Proceed? (yes/no)
 
 ## Sequential Workflow: Execute Bird Command
 
-CRITICAL: Follow this exact sequence with validation at each gate.
+CRITICAL: Follow this exact 5-step sequence with validation at each gate.
 
 ### Step 1: Resolve Executable
 **Action**: Ensure `bird` CLI exists
-**Validation**: `command -v bird` or check `$HOME/.local/bin/bird`
+**Validation**: `command -v bird` returns path OR `$HOME/.local/bin/bird` exists
 **Rollback**: Auto-install from GitHub release
 
 ```bash
@@ -82,14 +82,18 @@ fi
 ```
 
 ### Step 2: Verify CLI Health
-**Action**: Run `$BIRD_CMD check --plain`
-**Validation**: Output contains "Ready" or valid auth check
-**Rollback**: If fails, re-run install; if still fails, report "CLI installation failed"
+**Action**: Run health check command
+**Validation**: `$BIRD_CMD check --plain` output contains "Ready"
+**Rollback**: 
+- If fails: Re-run install sequence
+- If still fails: Report "Bird CLI installation failed. Check network or GitHub availability."
 
 ### Step 3: Verify Authentication
 **Action**: Confirm Twitter session is valid
-**Validation**: `$BIRD_CMD whoami --plain` returns `@username`
-**Rollback**: Try Chrome profile fallback; if all fail, instruct user to re-auth in browser
+**Validation**: `$BIRD_CMD whoami --plain` returns `@username` format
+**Rollback**: 
+- Try Chrome profile fallback (Profile 1-3)
+- If all fail: Instruct user to re-authenticate in browser first
 
 ```bash
 if ! $BIRD_CMD whoami --plain 2>/dev/null | grep -q "@"; then
@@ -104,14 +108,14 @@ fi
 ```
 
 ### Step 4: Execute User Command
-**Action**: Run requested bird operation
-**Validation**: Exit code 0, valid JSON/text output
-**Rollback**: On error, classify per Troubleshooting and retry if appropriate
+**Action**: Run requested bird operation with validated CLI
+**Validation**: Exit code 0 AND valid JSON/text output received
+**Rollback**: On error, classify per Troubleshooting table and retry once if appropriate
 
 ### Step 5: Present Results
-**Action**: Format output for user
-**Validation**: User understands the content
-**Rollback**: Offer raw output if summary is unclear
+**Action**: Format and summarize output for user
+**Validation**: User confirms understanding OR requests raw output
+**Rollback**: Offer raw JSON/terminal output if formatted summary is unclear
 
 ## URL Normalization
 
@@ -147,7 +151,12 @@ See `references/write-actions.md` for complete protocol.
 
 ## Reference Navigation
 
-**Load only when needed** — these are detailed references, not required for basic operation:
-- `references/search-operators.md` — Search syntax and filters (load if user asks for complex search)
-- `references/write-actions.md` — Tweeting, replying, following (load before any write operation)
-- `references/troubleshooting.md` — Detailed error remediation (load if auth or errors persist)
+**Load only when needed** — these are detailed references for specific situations. Do NOT load by default.
+
+| Reference | When to Load |
+|-----------|--------------|
+| `references/search-operators.md` | User asks for complex search with filters/operators |
+| `references/write-actions.md` | BEFORE any tweet/reply/follow/unbookmark operation |
+| `references/troubleshooting.md` | Auth failures persist after basic retry, or errors unclear |
+
+**Critical:** References contain extended documentation only. All essential workflow information is in this SKILL.md.

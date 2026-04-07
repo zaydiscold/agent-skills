@@ -3,7 +3,7 @@ name: last365days
 description: Persistent long-term research tracker that builds dated Markdown timelines for topics/people. Use when user says "track this over time", "research timeline", "last365", "persistent profile", "save research history", or requests multi-session tracking on a topic. Do NOT use for one-off quick searches without persistence.
 metadata:
   author: zaydk
-  version: 1.4.0
+  version: 1.4.1
   upstream: https://github.com/zaydk/last365days
   compatibility: "Requires Python 3.10+. Uses last30days.py as research engine."
 ---
@@ -26,9 +26,14 @@ Files saved to: `~/Desktop/last365days/` or `$LAST365DAYS_OUTPUT_DIR`
 
 ## Reference Navigation
 
-Load only when needed:
-- `references/file-format.md` — Profile Markdown schema and same-day deduplication logic
-- `references/operations.md` — Browse, diff, export workflows (debug/advanced)
+**Load only when needed** — reference files contain detailed documentation for specific use cases.
+
+| Reference | Load When |
+|-----------|-----------|
+| `references/file-format.md` | Debugging profile format issues or same-day deduplication problems |
+| `references/operations.md` | Advanced workflows: browse, diff, export operations |
+
+**Core workflow and all essential commands are in this SKILL.md.**
 
 ## Workflow: Iterative Research with Quality Gates
 

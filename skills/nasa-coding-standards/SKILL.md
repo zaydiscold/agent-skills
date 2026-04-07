@@ -3,7 +3,7 @@ name: nasa-coding-standards
 description: Enforce NASA JPL "Power of 10" safety-critical coding rules on C/C++, Python, JS, TS, or Go code. Use when user says "apply nasa rules", "check power of 10", "nasa coding standards", "safety-critical audit", or "verify code reliability". Do NOT use for general code review without safety-critical context.
 metadata:
   author: zaydk
-  version: 1.3.0
+  version: 1.4.0
   upstream: https://github.com/zaydk/nasa-coding-standards
   compatibility: "Works with any code language. References optimized for C/C++ and interpreted languages (Python/JS/TS/Go)."
 ---
@@ -26,13 +26,26 @@ Apply NASA JPL's "Power of 10" rules for safety-critical, verifiable, reliable s
 
 This skill is **problem-first**: User describes outcome ("make this code safe for embedded use"), skill handles the tool (NASA rule enforcement). Users never specify which rules to check — you apply all 10 rules systematically.
 
-User intent → Language detection → Rule reference selection → Full audit → Refactor → Summary.
+**Translation flow:** User intent → Language detection → Rule reference selection → Full audit → Refactor → Summary
+
+**Users NEVER need to know:**
+- The 10 specific rules by number
+- Which reference file to load
+- How to interpret violations
+- The difference between C and interpreted language rules
+
+**You handle all of this internally.**
 
 ## Reference Navigation
 
-Load based on target language:
-- `references/rules-c.md` — Original 10 rules for C/C++
-- `references/rules-interpreted.md` — Adapted rules for Python, JS, TS, Go
+**Load only when needed** — reference files contain detailed rule specifications. Load based on detected language.
+
+| Reference | Load When |
+|-----------|-----------|
+| `references/rules-c.md` | Auditing C/C++ code |
+| `references/rules-interpreted.md` | Auditing Python, JS, TS, or Go code |
+
+**All core workflow guidance is in this SKILL.md.**
 
 ## Workflow
 

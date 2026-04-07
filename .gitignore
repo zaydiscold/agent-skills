@@ -8,3 +8,11 @@ temp/
 zayds-security-toolkit/
 skills/universal-insights/
 
+# IDE/Editor metadata
+.cursor/
+.vscode/
+.idea/
+
+# Internal hermes skills (not public)
+skills/hermes/
+

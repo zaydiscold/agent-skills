@@ -22,6 +22,10 @@ Analyze AI coding sessions across multiple agents (Claude Code, Cursor, OpenAI C
 | `/insights --format md` | Markdown output |
 | `/insights --output ~/path.html` | Save to file |
 
+## Problem-First Framing
+
+This skill is **problem-first**: User describes outcome ("analyze my coding patterns"), skill handles the tools (adapters, AI extraction, report generation). Users never specify which adapter to use — you select based on their request.
+
 ## Reference Navigation
 
 - `references/adapters.md` — Session adapter implementations per agent
@@ -101,9 +105,19 @@ Parallel AI generation of 7 report sections:
 
 ### Step 5: Report Rendering
 
-**HTML** (default): Interactive, charts, collapsible sections
-**Markdown**: Plain text, good for sharing
-**JSON**: Raw data for programmatic use
+**Format selected based on context:**
+
+| User Context | Format | Why |
+|--------------|--------|-----|
+| "show me" / "view" / no format specified | HTML | Interactive, visual, default |
+| "share" / "post" / "email" | Markdown | Portable, readable in text |
+| "script" / "automate" / "analyze" | JSON | Programmatic processing |
+| "print" / "save as doc" | Markdown → PDF | Document format |
+
+**Format capabilities:**
+- **HTML**: Interactive charts, collapsible sections, styled components
+- **Markdown**: Plain text, copy-paste friendly, works everywhere
+- **JSON**: Raw data, schema-validated, for downstream processing
 
 ## Examples
 

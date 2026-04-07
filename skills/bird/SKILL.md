@@ -38,11 +38,19 @@ For detailed documentation, consult (only load when needed):
 - **NEVER fabricate tweet content**. Only report exactly what `bird` returns.
 - Write actions (`tweet`, `reply`, `follow`, `unbookmark`) require explicit user confirmation per `references/write-actions.md`.
 
-## Preflight & Auth Gating
+## Problem-First vs Tool-First Framing
 
-CRITICAL: Run this sequence before the first bird command each turn:
+This skill is **problem-first**: User describes outcome ("check this tweet"), skill handles the tool (`bird read`). Users never need to know `bird` exists — you translate their intent to CLI commands.
 
-### 1. Resolve bird executable
+## Sequential Workflow: Execute Bird Command
+
+CRITICAL: Follow this exact sequence with validation at each gate.
+
+### Step 1: Resolve Executable
+**Action**: Ensure `bird` CLI exists
+**Validation**: `command -v bird` or check `$HOME/.local/bin/bird`
+**Rollback**: Auto-install from GitHub release
+
 ```bash
 if command -v bird >/dev/null 2>&1; then
   BIRD_CMD="bird"
@@ -50,7 +58,6 @@ elif [ -x "$HOME/.local/bin/bird" ]; then
   export PATH="$HOME/.local/bin:$PATH"
   BIRD_CMD="$HOME/.local/bin/bird"
 else
-  # Auto-install if missing
   curl -fsSL https://github.com/zaydiscold/bird/releases/download/v0.8.0/bird -o /tmp/bird && \
     chmod +x /tmp/bird && \
     mkdir -p "$HOME/.local/bin" && \
@@ -60,14 +67,18 @@ else
 fi
 ```
 
-### 2. Verify CLI and Auth
-```bash
-# Check CLI health
-$BIRD_CMD check --plain
+### Step 2: Verify CLI Health
+**Action**: Run `$BIRD_CMD check --plain`
+**Validation**: Output contains "Ready" or valid auth check
+**Rollback**: If fails, re-run install; if still fails, report "CLI installation failed"
 
-# Verify auth (Safari preferred, Chrome fallback)
+### Step 3: Verify Authentication
+**Action**: Confirm Twitter session is valid
+**Validation**: `$BIRD_CMD whoami --plain` returns `@username`
+**Rollback**: Try Chrome profile fallback; if all fail, instruct user to re-auth in browser
+
+```bash
 if ! $BIRD_CMD whoami --plain 2>/dev/null | grep -q "@"; then
-  # Try Chrome profiles if Safari fails
   for profile in "Default" "Profile 1" "Profile 2" "Profile 3"; do
     if $BIRD_CMD --chrome-profile "$profile" check --plain 2>/dev/null | grep -q "Ready"; then
       mkdir -p "$HOME/.config/bird"
@@ -77,6 +88,16 @@ if ! $BIRD_CMD whoami --plain 2>/dev/null | grep -q "@"; then
   done
 fi
 ```
+
+### Step 4: Execute User Command
+**Action**: Run requested bird operation
+**Validation**: Exit code 0, valid JSON/text output
+**Rollback**: On error, classify per Troubleshooting and retry if appropriate
+
+### Step 5: Present Results
+**Action**: Format output for user
+**Validation**: User understands the content
+**Rollback**: Offer raw output if summary is unclear
 
 ## URL Normalization
 

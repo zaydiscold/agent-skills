@@ -30,63 +30,76 @@ Load only when needed:
 - `references/file-format.md` — Profile Markdown schema and same-day deduplication logic
 - `references/operations.md` — Browse, diff, export workflows (debug/advanced)
 
-## Workflow
+## Workflow: Iterative Research with Quality Gates
 
-### Step 1: Parse Intent & Check History
+This skill uses **iterative refinement** — research quality improves with validation loops.
 
-**If no topic provided** → List existing profiles and stop:
-```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py list
-```
+### Phase 1: Context Gathering
+**Goal**: Load prior history (if exists) to avoid duplication
 
-**If topic provided** → Match against existing profiles:
-```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py match "<RAW_TOPIC>"
-```
+**Step 1: Parse Intent**
+- If no topic → `persist.py list` → stop
+- If topic → `persist.py match "<topic>"`
 
-| Match Level | Action |
-|-------------|--------|
-| `exact` / `high` | Use existing profile, append new research |
-| `medium` | Read profile via `persist.py read <slug>`, ask user to confirm |
-| `none` | Create new profile |
+| Match | Action |
+|-------|--------|
+| `exact`/`high` | Load history → proceed to Phase 2 |
+| `medium` | Ask user: append to `<slug>` or create new? |
+| `none` | Create new profile → Phase 2 |
 
-If history exists, load it for context:
-```bash
-python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py history "<slug>"
-```
+**Validation Gate**: Confirm profile selection with user before proceeding
 
-### Step 2: Resolve X Handle (Optional)
-For topics likely to have Twitter presence:
-```bash
-# Quick WebSearch to find official handle
-# Pass to research: --x-handle=<handle>
-```
+### Phase 2: Research Execution
+**Goal**: Gather comprehensive data
 
-### Step 3: Run Research Engine
+**Step 2: Resolve X Handle** (if applicable)
+- Quick WebSearch for `{TOPIC} twitter x.com`
+- If verified handle found, pass `--x-handle=<handle>`
+
+**Step 3: Run last30days Engine**
 ```bash
 LAST30DAYS_OUTPUT_DIR="${LAST365DAYS_OUTPUT_DIR:-$HOME/.local/share/last365days/out}" \
 python3 "${CLAUDE_SKILL_DIR}/scripts/last30days.py" "<TOPIC>" \
-  --emit=compact \
-  --no-native-web \
+  --emit=compact --no-native-web \
   ${X_HANDLE:+--x-handle="$X_HANDLE"} \
   ${DAYS:+--days="$DAYS"} \
   ${QUICK:+--quick} \
   ${DEEP:+--deep}
 ```
-Flags: `--days=N`, `--quick`, `--deep`, `--x-handle=HANDLE`
 
-### Step 4: WebSearch Supplement
-Target searches on: `recommendations`, `news`, `prompting`, `announcements`
-Exclude: `x.com`, `reddit.com` (already covered by last30days)
+**Validation Gate**: Check exit code 0, output not empty
+**Rollback**: If script fails, run with `--quick` flag; if still fails, report error and stop
 
-### Step 5: Synthesize & Present
-Structure the response:
-1. **What changed since {last_date}** (if prior research exists)
-2. **What I learned** (3-6 key findings)
+**Step 4: WebSearch Supplement**
+Target: `recommendations`, `news`, `announcements`, `release`
+Exclude: `x.com`, `reddit.com` (already covered)
+
+### Phase 3: Quality Check Loop
+**Goal**: Ensure synthesis meets quality threshold
+
+**Initial Quality Criteria**:
+- [ ] At least 3 distinct findings
+- [ ] At least 2 cross-platform patterns
+- [ ] Source diversity (not all from same site)
+- [ ] Novel information (not duplicate of prior history)
+
+**If quality < threshold**:
+1. Identify gaps ("only 2 findings, need more")
+2. Run targeted WebSearch on missing angles
+3. Re-synthesize
+4. Re-validate
+5. **Max 3 iterations** — stop if quality doesn't improve
+
+### Phase 4: Synthesis & Presentation
+Structure:
+1. **What changed since {last_date}** (if prior history)
+2. **What I learned** (3-6 findings)
 3. **Key patterns** (2-4 cross-platform themes)
 4. **Source stats** (auto-read from `report.json`)
 
-### Step 6: Persist Results
+### Phase 5: Persist Results
+**Goal**: Save to profile with metadata
+
 ```bash
 cat << 'SYNTHESIS_EOF' | python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py append "<SLUG>" --title "<Display Name>"
 <YOUR SYNTHESIS HERE>
@@ -101,6 +114,8 @@ cat << 'SYNTHESIS_EOF' | python3 ${CLAUDE_SKILL_DIR}/scripts/persist.py append "
 SYNTHESIS_EOF
 ```
 
+**Validation Gate**: Verify file was written (`persist.py read <slug>`)
+**Rollback**: If persist fails, output synthesis to user anyway with note
 ## Examples
 
 ### Track a company over time

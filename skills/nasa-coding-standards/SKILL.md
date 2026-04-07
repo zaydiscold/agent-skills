@@ -108,9 +108,43 @@ User: "Does this code meet NASA standards?"
 | All rules fail | Legacy code | Prioritize CRITICAL, iterate |
 | Already compliant | Good code | Clearly state "10/10 rules passed" |
 
+## Pattern: Domain-Specific Intelligence
+
+This skill embeds **safety-critical domain expertise** beyond generic code review.
+
+### Compliance-First Processing
+**Before action, always apply domain rules:**
+
+1. **Safety assessment**: Could this code run in a life-critical system?
+2. **Rule hierarchy**: R1 (static allocation) > R2 (loop bounds) > R5 (recursion) > others
+3. **Exception handling**: If a rule cannot apply, document with `// NASA EXCEPTION: <reason>`
+4. **Audit trail**: Every decision must be explainable to a safety review board
+
+### Context-Aware Severity
+Same violation, different severity based on context:
+
+| Context | R1 (no malloc) | R5 (no recursion) |
+|---------|---------------|-------------------|
+| Embedded flight software | CRITICAL | CRITICAL |
+| Ground control tools | HIGH | MEDIUM |
+| Test harnesses | MEDIUM | LOW |
+| Simulation code | LOW | LOW |
+
+### Decision Tree for Rule Violations
+
+```
+Is the code in a safety-critical path?
+├── YES → All rules apply strictly, no exceptions without documentation
+└── NO → Apply with context:
+    ├── Performance-critical? → R1, R2 still HIGH
+    ├── User-facing? → R3, R4 prioritized
+    └── Internal tooling? → MEDIUM severity acceptable
+```
+
 ## Core Principles
 
 - **Safety first**: These rules prevent catastrophic failure in spacecraft. Be strict.
 - **All 10 must pass**: Partial compliance is non-compliance
 - **Document exceptions**: If a rule truly cannot apply, explain why inline
 - **No false confidence**: If unsure about a violation, flag it as MEDIUM for human review
+- **Context matters**: Same code, different severity based on where it runs

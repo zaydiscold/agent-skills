@@ -70,18 +70,46 @@ export PATH="$HOME/.codex-orchestrator/bin:$PATH" && \
 
 **Parallelism**: Deploy multiple agents by spawning repeatedly, then `await-turn` each.
 
+## Pattern: Multi-MCP Coordination
+
+This skill orchestrates **multiple agent types across phases** — you coordinate, Codex executes. Each phase outputs artifacts consumed by the next.
+
+### Phase Separation with Data Passing
+
+```
+Phase 1: Research (Codex -s read-only)
+    ↓ [outputs: research findings]
+Phase 2: PRD (You synthesize)
+    ↓ [outputs: docs/prds/feature.md]
+Phase 3: Implementation (Codex -s workspace-write)
+    ↓ [outputs: code + tests]
+Phase 4: Review (Codex -s read-only + You)
+    ↓ [outputs: review notes]
+Phase 5: Testing (Codex -s workspace-write)
+    ↓ [outputs: test results]
+Phase 6: Delivery (You present to User)
+```
+
+### Validation Gates Between Phases
+| Gate | Criteria | Failure Rollback |
+|------|----------|------------------|
+| Research → PRD | ≥3 distinct findings | Re-spawn with broader query |
+| PRD → Implementation | User explicit approval | Revise PRD per feedback |
+| Implementation → Review | Code compiles/tests run | Debug loop (max 3 iterations) |
+| Review → Testing | No CRITICAL security issues | Fix issues, re-review |
+
 ## The Factory Pipeline
 
 For complex tasks. User = approver, Codex = engineering team.
 
-| Phase | Mode | Action |
-|-------|------|--------|
-| 1. Ideation | N/A | You + User clarify scope |
-| 2. Research | `-s read-only` | Parallel agents across vectors |
-| 3. PRD | N/A | You synthesize, write to `docs/prds/`, user approves |
-| 4. Implementation | `-s workspace-write` | Codex executes |
-| 5. Review | `-s read-only` | Logic + security audit |
-| 6. Testing | `-s workspace-write` | Verification |
+| Phase | Mode | Action | Output |
+|-------|------|--------|--------|
+| 1. Ideation | N/A | You + User clarify scope | Task definition |
+| 2. Research | `-s read-only` | Parallel agents across vectors | Research notes |
+| 3. PRD | N/A | You synthesize findings | `docs/prds/*.md` |
+| 4. Implementation | `-s workspace-write` | Codex executes PRD | Code + tests |
+| 5. Review | `-s read-only` | Logic + security audit | Review notes |
+| 6. Testing | `-s workspace-write` | Run test suite | Test results |
 
 ## Examples
 

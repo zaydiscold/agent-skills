@@ -3,3 +3,8 @@ node_modules/
 .DS_Store
 temp/
 *.tmp
+
+# Private skills - keep local only
+zayds-security-toolkit/
+skills/universal-insights/
+

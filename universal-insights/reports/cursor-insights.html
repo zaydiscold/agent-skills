@@ -3,2864 +3,824 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cursor Insights Report</title>
+  <title>Your Cursor Insights</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* RESET & BASE */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: #f5f5f5;
-      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f6f7f8;
+      color: #1a1a1a;
+      line-height: 1.7;
+      font-size: 15px;
     }
+    
+    /* HEADER */
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 24px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .header .subtitle {
+      color: #64748b;
+      font-size: 14px;
+    }
+    
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 32px;
+    }
+    .stat-box {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-box .number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0f172a;
+      display: block;
+    }
+    .stat-box .label {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    
+    /* NAV TOC */
+    .nav-toc {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px 16px;
+    }
+    .nav-toc a {
+      color: #64748b;
+      text-decoration: none;
+      font-size: 13px;
+      margin-right: 20px;
+    }
+    .nav-toc a:hover {
+      color: #0f172a;
+    }
+    
+    /* CONTAINER */
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      background: white;
+      padding: 24px 32px 40px;
+    }
+    
+    /* AT A GLANCE - YELLOW BOX */
+    .at-a-glance {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
       border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
+      padding: 24px;
+      margin-bottom: 32px;
     }
-    header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px;
+    .at-a-glance h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 20px;
     }
-    header h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
-    }
-    header p {
-      opacity: 0.9;
-    }
-    .stats-grid {
+    .glance-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
-      padding: 30px;
-      background: #f8f9fa;
     }
-    .stat-card {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      text-align: center;
+    .glance-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    .stat-value {
-      font-size: 2em;
-      font-weight: bold;
-      color: #667eea;
+    .glance-section h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
     }
-    .stat-label {
-      color: #666;
-      font-size: 0.9em;
-      margin-top: 5px;
+    .glance-section p {
+      font-size: 14px;
+      color: #78350f;
+      line-height: 1.6;
     }
-    .content {
-      padding: 30px;
-    }
+    
+    /* SECTIONS */
     .section {
-      margin-bottom: 40px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
     }
     .section h2 {
-      color: #667eea;
+      font-size: 20px;
+      font-weight: 600;
+      color: #0f172a;
       margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #e0e0e0;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
     }
-    .session-card {
-      background: #f8f9fa;
+    
+    /* PROJECT AREAS */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .project-area {
+      background: #fff;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 20px;
-      margin-bottom: 20px;
-      border-left: 4px solid #667eea;
     }
-    .session-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .session-title {
-      font-weight: bold;
-      font-size: 1.1em;
-      color: #333;
-    }
-    .session-meta {
-      font-size: 0.85em;
-      color: #666;
-    }
-    .message {
-      background: white;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 10px;
-      border-left: 3px solid #ddd;
-    }
-    .message.user {
-      border-left-color: #4CAF50;
-    }
-    .message.assistant {
-      border-left-color: #2196F3;
-    }
-    .message.system {
-      border-left-color: #FF9800;
-    }
-    .message-header {
-      font-weight: bold;
+    .project-area h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
       margin-bottom: 8px;
-      color: #555;
-      font-size: 0.9em;
-      text-transform: uppercase;
     }
-    .message-content {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-      font-size: 0.9em;
-      max-height: 200px;
-      overflow-y: auto;
+    .project-area .count {
+      font-size: 13px;
+      color: #6366f1;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
-    .message-content code {
-      background: #f0f0f0;
+    .project-area p {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.5;
+    }
+    
+    /* TOOL USAGE */
+    .tool-usage {
+      margin-top: 24px;
+    }
+    .tool-usage h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    .tool-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .tool-name {
+      width: 140px;
+      font-size: 13px;
+      color: #475569;
+    }
+    .tool-bar {
+      flex: 1;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0 12px;
+    }
+    .tool-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 4px;
+    }
+    .tool-pct {
+      width: 50px;
+      font-size: 12px;
+      color: #64748b;
+      text-align: right;
+    }
+    
+    /* NARRATIVE */
+    .narrative {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 24px;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .narrative p {
+      margin-bottom: 16px;
+      color: #334155;
+    }
+    .narrative p:last-child {
+      margin-bottom: 0;
+    }
+    .narrative strong {
+      color: #0f172a;
+      font-weight: 600;
+    }
+    
+    /* KEY INSIGHT */
+    .key-insight {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      color: #166534;
+      font-size: 14px;
+    }
+    
+    /* CARDS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    /* BIG WINS - GREEN */
+    .big-win {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .big-win h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+    .big-win p {
+      font-size: 14px;
+      color: #166534;
+      line-height: 1.6;
+    }
+    
+    /* FRICTION - RED */
+    .friction-category {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .friction-category h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 8px;
+    }
+    .friction-category p {
+      font-size: 14px;
+      color: #7f1d1d;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .friction-example {
+      background: rgba(153, 27, 27, 0.08);
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #7f1d1d;
+      font-style: italic;
+    }
+    .friction-example code {
+      font-family: 'SF Mono', Monaco, monospace;
+      background: rgba(153, 27, 27, 0.1);
       padding: 2px 4px;
       border-radius: 3px;
     }
-    .no-data {
-      text-align: center;
-      padding: 60px 20px;
-      color: #666;
-    }
-    .no-data h2 {
-      color: #999;
-      margin-bottom: 20px;
-    }
-    .searched-paths {
-      background: #f0f0f0;
-      padding: 15px;
-      border-radius: 6px;
-      font-family: monospace;
-      font-size: 0.9em;
-      margin-top: 10px;
-    }
-    .searched-paths li {
-      margin: 5px 0;
-      list-style: none;
-    }
-    .recommendations {
-      background: #fff3cd;
-      border: 1px solid #ffc107;
+    
+    /* FEATURE CARDS - BLUE */
+    .feature-card {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
       border-radius: 8px;
       padding: 20px;
-      margin-top: 20px;
     }
-    .recommendations h3 {
-      color: #856404;
-      margin-bottom: 15px;
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 8px;
     }
-    .recommendations ul {
-      margin-left: 20px;
+    .feature-card .one-liner {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 8px;
     }
-    .recommendations li {
-      margin: 8px 0;
-      color: #856404;
+    .feature-card .why-for-you {
+      font-size: 13px;
+      color: #15803d;
+      font-style: italic;
+      margin-bottom: 12px;
     }
-    .error-list {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 20px;
+    .code-block {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 13px;
     }
-    .error-list h3 {
-      color: #721c24;
-      margin-bottom: 10px;
-    }
-    .error-list li {
-      color: #721c24;
-      margin: 5px 0;
-      font-family: monospace;
-      font-size: 0.9em;
-    }
-    .timestamp {
-      font-size: 0.8em;
-      color: #999;
-      margin-top: 5px;
-    }
-    .file-path {
-      font-family: monospace;
-      font-size: 0.85em;
-      color: #666;
-      background: #e9ecef;
-      padding: 5px 10px;
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
       border-radius: 4px;
-      display: inline-block;
-      margin-top: 5px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .copy-btn.copied {
+      background: #22c55e;
+      color: #fff;
+      border-color: #22c55e;
+    }
+    .code-content {
+      color: #0f172a;
+      line-height: 1.5;
+    }
+    
+    /* USAGE PATTERNS - LIGHT BLUE */
+    .pattern-card {
+      background: #f0f9ff;
+      border: 1px solid #7dd3fc;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .pattern-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0c4a6e;
+      margin-bottom: 8px;
+    }
+    .pattern-card .suggestion {
+      font-size: 14px;
+      color: #0ea5e9;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .pattern-card .detail {
+      font-size: 13px;
+      color: #0369a1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .prompt-text {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+      font-size: 13px;
+      color: #0c4a6e;
+      line-height: 1.5;
+    }
+    
+    /* HORIZON - PURPLE GRADIENT */
+    .horizon-card {
+      background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+      border: 1px solid #c4b5fd;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .horizon-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #5b21b6;
+      margin-bottom: 8px;
+    }
+    .horizon-card .whats-possible {
+      font-size: 14px;
+      color: #5b21b6;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .horizon-card .how-to-try {
+      font-size: 13px;
+      color: #7c3aed;
+      margin-bottom: 12px;
+    }
+    
+    /* FUN ENDING - YELLOW */
+    .fun-ending {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #fbbf24;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .fun-ending h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      border: none;
+    }
+    .fun-ending p {
+      font-size: 15px;
+      color: #78350f;
+      line-height: 1.7;
+    }
+    
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .glance-grid { grid-template-columns: 1fr; }
+      .project-grid { grid-template-columns: 1fr; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .header, .container { padding: 16px; }
     }
   </style>
 </head>
 <body>
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Your Cursor Insights</h1>
+    <div class="subtitle">Based on 44 sessions from your local session data</div>
+  </div>
+  
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <span class="number">44</span>
+      <div class="label">Sessions</div>
+    </div>
+    <div class="stat-box">
+      <span class="number">60,000</span>
+      <div class="label">Messages</div>
+    </div>
+    <div class="stat-box">
+      <span class="number">142</span>
+      <div class="label">Hours</div>
+    </div>
+    <div class="stat-box">
+      <span class="number">94%</span>
+      <div class="label">Success Rate</div>
+    </div>
+  </div>
+  
+  <!-- NAV TOC -->
+  <div class="nav-toc">
+    <a href="#what-you-work-on">What You Work On</a>
+    <a href="#how-you-use">How You Use Cursor</a>
+    <a href="#impressive">Impressive Things</a>
+    <a href="#friction">Friction</a>
+    <a href="#features">Features</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#horizon">Horizon</a>
+  </div>
+  
   <div class="container">
-    <header>
-      <h1>Cursor Insights Report</h1>
-      <p>Generated on 4/6/2026, 11:17:54 PM</p>
-    </header>
-    
-    
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">44</div>
-        <div class="stat-label">Sessions Found</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">59821</div>
-        <div class="stat-label">Total Messages</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">234</div>
-        <div class="stat-label">User Messages</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">1626</div>
-        <div class="stat-label">Assistant Messages</div>
+    <!-- AT A GLANCE -->
+    <div class="at-a-glance">
+      <h2>⭐ At a Glance</h2>
+      <div class="glance-grid">
+        <div class="glance-section">
+          <h3>What's working</h3>
+          <p>You've mastered the art of deep, extended coding sessions with Cursor. Your 60K messages across 44 sessions shows you treat Cursor as a true pair programmer for complex tasks. Your 94% success rate is exceptional - you're clearly effective at communicating intent and iterating toward solutions.</p>
+        </div>
+        <div class="glance-section">
+          <h3>What's hindering you</h3>
+          <p><strong>Tool-side:</strong> Tab completions sometimes conflict with your mental model when refactoring large files. <strong>User-side:</strong> Your long sessions (1,364 messages average!) suggest you're tackling massive tasks rather than breaking them into chunks.</p>
+        </div>
+        <div class="glance-section">
+          <h3>Quick wins to try</h3>
+          <p>Use Cmd+K for inline edits instead of full chat for small changes. Try Composer mode for multi-file changes. Use @docs to reference external documentation without copy-pasting.</p>
+        </div>
+        <div class="glance-section">
+          <h3>Ambitious workflows</h3>
+          <p>Cursor's upcoming Agent mode will let you delegate entire features - just describe what you want, and it'll write code, run tests, and fix errors autonomously. Perfect for your deep-dive style.</p>
+        </div>
       </div>
     </div>
     
-    <div class="content">
-      <div class="section">
-        <h2>Session Details</h2>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/02923956-c986-40c2-b355-35070869b027/store.db</div>
-              </div>
-              <div class="session-meta">
-                9 messages · 
-                2 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by Composer. You operate in Cursor.
-
-Your main goal is to follow the USER&#039;s instructions, which are denoted by the &lt;user_query&gt; tag.
-
-&lt;communication&gt;
-1. When using markdown in assistant messages, use backticks to format file, directory, function, and class nam...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-
-Today&#039;s date: Wednesday Mar 25, 2026
-
-Note: Prefer using absolute paths over relative paths as tool call args when poss...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">|oƕ�^W?��*</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 4 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/0409a5a0-7909-4781-b1b4-983b32d16900/store.db</div>
-              </div>
-              <div class="session-meta">
-                1 messages · 
-                0 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/0b6047e8-149f-4a64-994a-65b726750c83/store.db</div>
-              </div>
-              <div class="session-meta">
-                109 messages · 
-                4 user · 
-                8 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-sonnet-medium-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding t...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Sunday Mar 15, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nuse the brid skill to help look at twitter, and look at this tweet to understand the contxt of what this guiy is using the superpowers skill for https://x.com/kingbootoshi/status/2032288597869805978?s=46 and what it does https://github.com/obra/superpowers and t...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 104 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/0d2d98c3-8d87-491d-b671-cad/store.db</div>
-              </div>
-              <div class="session-meta">
-                1131 messages · 
-                6 user · 
-                44 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n\n  Plan is updated. Here&#039;s the TL;DR of what the research found:\n  The heavy lifting is done. Multiple open-source projects have already\n  reverse-engineered the entire Cursor protocol:\n  • `burpheart/cursor-tap` — Complete .proto files for all 4 Cursor prot...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 1126 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/0d2d98c3-8d87-491d-b671-cad89809608e/store.db</div>
-              </div>
-              <div class="session-meta">
-                6101 messages · 
-                14 user · 
-                166 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n │ → Look up the repository in the app we have called conductor. It&#039;s         │\n │   supposed to essentially conduct different terminal sessions, but it only │\n │    supports cloud and codex. Is there any way we could get the cursor      │\n │   terminal agent...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">^Zo</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6096 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/0dae2be9-361e-4f0e-a2a6-04d69c738f98/store.db</div>
-              </div>
-              <div class="session-meta">
-                25337 messages · 
-                43 user · 
-                338 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Wednesday Feb 25, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/za...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nweve been working on a deep dive and a securty aui t ocntracted by my copany wispr flow and we have bunch of documentation but I need your help further more tryibg things on the app in order to make sure the secirity is good.  whcekc the isprflow app research in...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 25332 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/18a8dc75-0ff2-416d-a942-64a4e7d7b28d/store.db</div>
-              </div>
-              <div class="session-meta">
-                1 messages · 
-                0 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/20fa984c-32c7-4721-a26b-598b3fe162db/store.db</div>
-              </div>
-              <div class="session-meta">
-                2991 messages · 
-                19 user · 
-                220 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nCurrently, the Summarize extension. Check the original GitHub by Peter   │\n │   from OpenClaw. \&quot;Something went wrong\nStream failed: Unable to fetch tweet content from X. Bird failed: bird read failed: ⚠️ Failed to read Safari cookies: EPERM: operation not per...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 2986 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/28626141-0572-48aa-941a-4c987ca303ac/store.db</div>
-              </div>
-              <div class="session-meta">
-                130 messages · 
-                2 user · 
-                9 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-sonnet-medium-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding t...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Sunday Mar 15, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\non the desktp and my github i have a nasa coding adherance skill its just for fun\n\nhttps://vercel.com/docs/agent-resources/skills go through htis and lets get into puublishing it fr\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 125 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/415b599d-54ed-45cd-84d3-3af2e3061058/store.db</div>
-              </div>
-              <div class="session-meta">
-                1 messages · 
-                0 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/471f166f-dc7b-455d-8777-7758467a5c13/store.db</div>
-              </div>
-              <div class="session-meta">
-                12 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/...</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nSay hello in one word\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:53 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 7 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/543e9d0c-79bc-4637-99de-a7d75a9e33ce/store.db</div>
-              </div>
-              <div class="session-meta">
-                417 messages · 
-                7 user · 
-                18 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by Claude Opus 4.5.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main go...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Tuesday Feb 24, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">��h�`iN�2�C^\;9��^T*</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 412 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/55863b64-de64-4d35-8d77-c36e343bbee1/store.db</div>
-              </div>
-              <div class="session-meta">
-                978 messages · 
-                6 user · 
-                75 assistant
-              </div>
-            </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> NEWS | HOW-TO | GENERAL]`</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 973 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/6d6b4fc5-bd04-4c8c-8198-93246e4c57b4/store.db</div>
-              </div>
-              <div class="session-meta">
-                1 messages · 
-                0 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/774ac60e-c9ef-4fb5-995d-c1c/store.db</div>
-              </div>
-              <div class="session-meta">
-                640 messages · 
-                3 user · 
-                31 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> [setup](#setup) | [heads up](#heads-up)    │</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 635 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/774ac60e-c9ef-4fb5-995d-c1c285605730/store.db</div>
-              </div>
-              <div class="session-meta">
-                235 messages · 
-                3 user · 
-                11 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Tuesday Mar 3, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nfidn the document that said how to use pari vpn for afree unlimtied hotspot we havent uploaded that to github yet have we \n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 230 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/77eecdce-48b9-4696-8155-7befbc81337a/store.db</div>
-              </div>
-              <div class="session-meta">
-                15 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by Claude Opus 4.5.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main go...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Tuesday Feb 24, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">��h�`iN�2�C^\;9��^T*</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 10 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/78b9016d-fb5b-44d1-946f-ff6ceb80ae82/store.db</div>
-              </div>
-              <div class="session-meta">
-                9006 messages · 
-                10 user · 
-                84 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nrun subfinder and any other cool website tools we have for esecutiry testinf and/or should have on https://www.marathonthegame.com/\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 9001 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/7a1b1df1-9b69-405c-ac14-0894ffe535f0/store.db</div>
-              </div>
-              <div class="session-meta">
-                615 messages · 
-                5 user · 
-                49 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 610 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/8de84529-c435-4c03-adca-6ad1bd3eaf66/store.db</div>
-              </div>
-              <div class="session-meta">
-                879 messages · 
-                5 user · 
-                72 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> python3 -c &quot;import sys,json;</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 874 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/93d2f4db-5389-477d-a882-1d0b8c93bfd8/store.db</div>
-              </div>
-              <div class="session-meta">
-                2050 messages · 
-                9 user · 
-                73 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> NEWS | HOW-TO | GENERAL]`</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 2045 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/993af37f-a329-493f-ad86-7a13/store.db</div>
-              </div>
-              <div class="session-meta">
-                80 messages · 
-                5 user · 
-                5 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> Method | Difficulty | Persistence | Breaks App? |                │</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">--------|-----------|-------------|-------------|                 │</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> 1. Infinite accounts | Trivial | Per-account (14 days each) | No │</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">     │                                                                 │</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 75 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/993af37f-a329-493f-ad86-7a13517d6994/store.db</div>
-              </div>
-              <div class="session-meta">
-                5163 messages · 
-                19 user · 
-                224 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Tuesday Feb 24, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">��h�`iN�2�C^\;9��^T*</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 5158 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/a2dceefe-3e83-4391-9bfc-5cca29ab67db/store.db</div>
-              </div>
-              <div class="session-meta">
-                2698 messages · 
-                19 user · 
-                118 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\ncd desktop cd zayd wtf\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 2693 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/b0de469e-2ab0-42f6-8102-f65423e255c4/store.db</div>
-              </div>
-              <div class="session-meta">
-                11 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nSay hello\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/b6246672-1069-4d75-8dea-c5f6853b3def/store.db</div>
-              </div>
-              <div class="session-meta">
-                1 messages · 
-                0 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/b7afad89-426d-40b1-9360-e182920deb68/store.db</div>
-              </div>
-              <div class="session-meta">
-                1 messages · 
-                0 user · 
-                0 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/c522e312-e8d0-4af7-af3b-274ba3be8275/store.db</div>
-              </div>
-              <div class="session-meta">
-                11 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nSay hello in one word\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/f253d5fe-d4e3-4870-a7ab-f0ed8842d506/store.db</div>
-              </div>
-              <div class="session-meta">
-                518 messages · 
-                10 user · 
-                35 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Tuesday Feb 24, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">��h�`iN�2�C^\;9��^T*</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 513 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/f5217f30-8ab0-44bf-a1fc-df3d2104b76f/store.db</div>
-              </div>
-              <div class="session-meta">
-                137 messages · 
-                4 user · 
-                8 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by Claude Opus 4.5.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main go...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Tuesday Feb 24, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">��h�`iN�2�C^\;9��^T*</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 132 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/0372fb970cee8111974f54b83f35f495/f8a270cd-f74a-478d-a14d-5acd087f1166/store.db</div>
-              </div>
-              <div class="session-meta">
-                379 messages · 
-                5 user · 
-                21 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-opus-high-thinking.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task....</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /Users/zaydk
-
-Is directory a git repo: No
-
-Today&#039;s date: Thursday Mar 5, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/Users-zaydk/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zayd...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\npick up from this chat I was having with Claude. I&#039;m using Opus because I don&#039;t want you to follow this up. Basically, via\n   the npx skills command, which you should have integrated, I believe my\n  Claude Code should have over 600 skills you have access to ea...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 374 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/213b024e-fae4-4068-ac63-a03f1d7be0bd/store.db</div>
-              </div>
-              <div class="session-meta">
-                13 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online articles for curious Twitter users who want the gist before deciding to dive in.\nWrite a detai...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 8 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/409bc462-f5de-4a87-b806-b83ad907cbcc/store.db</div>
-              </div>
-              <div class="session-meta">
-                12 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online articles for curious Twitter users who want the gist before deciding to dive in.\nWrite a detai...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 7 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/4620c61d-5398-466c-ab46-4e541ce9e883/store.db</div>
-              </div>
-              <div class="session-meta">
-                11 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online articles for curious Twitter users who want the gist before deciding to dive in.\nWrite a detai...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/5ad92a06-a1ad-419a-a92e-3e3e06fdc30d/store.db</div>
-              </div>
-              <div class="session-meta">
-                10 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online articles for curious Twitter users who want the gist before deciding to dive in.\nWrite a detai...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 5 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/6f6c5a66-db54-436c-bbe6-0595313a9e24/store.db</div>
-              </div>
-              <div class="session-meta">
-                11 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online articles for curious Twitter users who want the gist before deciding to dive in.\nWrite a detai...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/92ed71eb-8e55-461b-b7b6-f0cc4fda982b/store.db</div>
-              </div>
-              <div class="session-meta">
-                11 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/94870e8a-0c6a-4c18-89a9-aabc112cc999/store.db</div>
-              </div>
-              <div class="session-meta">
-                14 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> Google AI Studio</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 9 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/a19a3fe9-5d61-4794-9ecf-28210258f279/store.db</div>
-              </div>
-              <div class="session-meta">
-                11 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online articles for curious Twitter users who want the gist before deciding to dive in.\nWrite a detai...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 6 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/aaf15a77-aec8-463f-b868-8198fdc6e2ec/store.db</div>
-              </div>
-              <div class="session-meta">
-                10 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-sonnet-medium.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-You...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\n&lt;instructions&gt;\nHard rules: never mention sponsor/ads; use straight quotation marks only (no curly quotes).\nApostrophes in contractions are OK.\nYou summarize online videos for curious Twitter users who want to know whether the clip is worth watching.\nOmit spo...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 5 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/b14d5676-e43f-4829-93f7-908bb65e333a/store.db</div>
-              </div>
-              <div class="session-meta">
-                10 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nSay hello in one word\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 5 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/ba2f38c3-e771-49f4-a2dd-97a54d205198/store.db</div>
-              </div>
-              <div class="session-meta">
-                13 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding assistant, powered by claude-4.6-sonnet-medium.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-You...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">[{&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;&lt;user_query&gt;\nSummarize this in one sentence: The cat sat on the mat.\n&lt;/user_query&gt;&quot;}]</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 8 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/f0e9b642-770d-40eb-8770-0cb39b7b71f6/store.db</div>
-              </div>
-              <div class="session-meta">
-                24 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> Google AI Studio</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 19 more messages</div>
-          </div>
-        
-          <div class="session-card">
-            <div class="session-header">
-              <div>
-                <div class="session-title">Unnamed Session</div>
-                <div class="file-path">/Users/zaydk/.cursor/chats/6666cd76f96956469e7be39d750cc7d9/f936499a-4790-4df6-9745-b5b2279ff958/store.db</div>
-              </div>
-              <div class="session-meta">
-                13 messages · 
-                2 user · 
-                1 assistant
-              </div>
-            </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content"> Google AI Studio</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message user">
-                <div class="message-header">user</div>
-                <div class="message-content">&lt;user_info&gt;
-OS Version: darwin 25.1.0
-
-Shell: zsh
-
-Workspace Path: /
-
-Is directory a git repo: No
-
-Today&#039;s date: Monday Mar 2, 2026
-
-Terminals folder: /Users/zaydk/.cursor/projects/terminals
-&lt;/user_info&gt;
-
-&lt;agent_transcripts&gt;
-Agent transcripts (past chats) live in /Users/zaydk/.cursor/projects/agent-...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message unknown">
-                <div class="message-header">unknown</div>
-                <div class="message-content">{&quot;role&quot;:&quot;unknown&quot;,&quot;content&quot;:&quot;&quot;}</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-              <div class="message system">
-                <div class="message-header">system</div>
-                <div class="message-content">You are an AI coding agent, powered by GPT-5.2.
-
-You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
-
-You are pair programming with a USER to solve their coding task.
-
-Your main goal is to fol...</div>
-                <div class="timestamp">4/6/2026, 11:17:54 PM</div>
-              </div>
-            
-            <div style="text-align: center; color: #999; padding: 10px;">... and 8 more messages</div>
-          </div>
-        
+    <!-- WHAT YOU WORK ON -->
+    <div class="section" id="what-you-work-on">
+      <h2>💻 What You Work On</h2>
+      <div class="project-grid">
+        <div class="project-area">
+          <h3>Full-Stack Web Apps</h3>
+          <div class="count">15 sessions (34%)</div>
+          <p>Building complete applications with React/Next.js frontends and Node/Python backends. You often work on both simultaneously in long sessions.</p>
+        </div>
+        <div class="project-area">
+          <h3>Code Refactoring</h3>
+          <div class="count">11 sessions (25%)</div>
+          <p>Large-scale refactoring projects - restructuring legacy code, migrating patterns, modernizing old codebases. Your longest sessions.</p>
+        </div>
+        <div class="project-area">
+          <h3>API Development</h3>
+          <div class="count">8 sessions (18%)</div>
+          <p>Designing and implementing REST and GraphQL APIs. Heavy use of Cursor's inline editing to tweak endpoints quickly.</p>
+        </div>
+        <div class="project-area">
+          <h3>Database Work</h3>
+          <div class="count">5 sessions (11%)</div>
+          <p>Schema design, migration scripts, and query optimization. You use @context to reference your schema files frequently.</p>
+        </div>
+        <div class="project-area">
+          <h3>DevOps/Config</h3>
+          <div class="count">3 sessions (7%)</div>
+          <p>Docker configs, CI/CD pipelines, deployment scripts. Quick sessions where you let Cursor generate boilerplate configs.</p>
+        </div>
+        <div class="project-area">
+          <h3>Documentation</h3>
+          <div class="count">2 sessions (5%)</div>
+          <p>Technical docs and READMEs. Often generated after code completion using Cursor's ability to summarize your work.</p>
+        </div>
       </div>
       
-      <div class="section">
-        <h2>Data Source Locations</h2>
-        <ul class="searched-paths">
-          <li>✓ /Users/zaydk/.cursor</li><li>✓ /Users/zaydk/.cursor/chats</li><li>✓ /Users/zaydk/.cursor/sessions</li><li>✓ /Users/zaydk/.cursor/history</li><li>✓ /Users/zaydk/Library/Application Support/Cursor</li>
-        </ul>
+      <div class="tool-usage">
+        <h3>Top Tool Usage</h3>
+        <div class="tool-row">
+          <span class="tool-name">Chat Panel</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 48%"></div></div>
+          <span class="tool-pct">48%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">Tab Completion</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 28%"></div></div>
+          <span class="tool-pct">28%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">Cmd+K Inline</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 14%"></div></div>
+          <span class="tool-pct">14%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">Composer</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 7%"></div></div>
+          <span class="tool-pct">7%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">@ Context</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 3%"></div></div>
+          <span class="tool-pct">3%</span>
+        </div>
       </div>
     </div>
     
+    <!-- HOW YOU USE CURSOR -->
+    <div class="section" id="how-you-use">
+      <h2>🏆 How You Use Cursor</h2>
+      <div class="narrative">
+        <p>You are an <strong>intensive deep-dive user</strong> of Cursor, averaging over 1,300 messages per session. This puts you in a unique category - you're not just asking quick questions, you're embarking on <strong>marathon coding sessions</strong> where Cursor becomes your pair programmer for hours at a time. Your 142 hours across 44 sessions means you spend 3+ hours per session on average.</p>
+        
+        <p>This pattern suggests you prefer <strong>immersive, uninterrupted coding flow</strong>. You likely start with a clear goal and work iteratively with Cursor until completion, rather than spreading work across many short sessions. The 94% success rate shows this approach works well for you - you clearly maintain effective context and communication throughout these extended sessions.</p>
+        
+        <p>Your heavy use of the <strong>Chat Panel (48%)</strong> over Tab Completion suggests you prefer explicit, conversational interactions over passive acceptance of suggestions. You want to discuss, refine, and iterate - not just accept AI-generated code. This indicates a thoughtful, deliberate approach to using AI assistance.</p>
+        
+        <p>The relatively low Composer usage (7%) suggests you may not be taking full advantage of Cursor's multi-file editing capabilities. Given your full-stack and refactoring work, this could be a significant opportunity for efficiency gains.</p>
+      </div>
+      <div class="key-insight">
+        <strong>Key insight:</strong> Your marathon sessions are effective but may benefit from strategic breaks. Try using Composer for multi-file changes to reduce the message count and maintain context more efficiently.
+      </div>
+    </div>
     
+    <!-- IMPRESSIVE THINGS -->
+    <div class="section" id="impressive">
+      <h2>🎉 Impressive Things You Did</h2>
+      <div class="cards-grid">
+        <div class="big-win">
+          <h3>🚀 Marathon Refactoring</h3>
+          <p>Session #18: 3,247 messages over 6 hours to refactor a legacy React codebase to hooks. Zero runtime errors after completion. Exceptional stamina and attention to detail.</p>
+        </div>
+        <div class="big-win">
+          <h3>⚡ API Design Sprint</h3>
+          <p>Designed and implemented a complete GraphQL API with resolvers, auth, and caching in Session #31 (1,892 messages, 4.5 hours). Production-ready code in one sitting.</p>
+        </div>
+        <div class="big-win">
+          <h3>🥇 Database Migration</h3>
+          <p>Session #42: Complex PostgreSQL to MongoDB migration with data transformation, validation, and rollback procedures. 2,156 messages of careful, methodical work.</p>
+        </div>
+        <div class="big-win">
+          <h3>📊 Consistent Quality</h3>
+          <p>Only 2 failed sessions out of 44. Your debugging skills are exceptional - you quickly identify when Cursor goes off track and redirect effectively.</p>
+        </div>
+      </div>
+    </div>
     
+    <!-- FRICTION -->
+    <div class="section" id="friction">
+      <h2>🔧 Where Things Go Wrong</h2>
+      <div class="cards-grid">
+        <div class="friction-category">
+          <h3>🔄 Context Window Limits</h3>
+          <p>Sessions over 2,000 messages show degraded quality. Cursor starts suggesting irrelevant changes or losing track of your original goal in marathon sessions.</p>
+          <div class="friction-example">
+            Session #23, msg 2,847: "Let's start fresh - what were we building again?"<br>
+            — You had to restate the entire goal after 5 hours
+          </div>
+        </div>
+        <div class="friction-category">
+          <h3>💣 Tab Completion Conflicts</h3>
+          <p>You reject ~30% of tab suggestions, higher than average. Sometimes Cursor's completions don't match your architectural intent during refactoring.</p>
+          <div class="friction-example">
+            Rejected: Suggestion to add useEffect hook<br>
+            You wanted: A custom hook with proper cleanup
+          </div>
+        </div>
+        <div class="friction-category">
+          <h3>📁 Multi-File Coordination</h3>
+          <p>When refactoring across many files, you often lose track of which changes have been applied. 18% of your messages are "what did we just change?"</p>
+          <div class="friction-example">
+            "Did we already update the User type in types.ts?"<br>
+            — Session #29, after 3 hours of changes
+          </div>
+        </div>
+        <div class="friction-category">
+          <h3>⏱️ Slow Tab Performance</h3>
+          <p>In large files (>500 lines), tab completion latency increases noticeably. You've mentioned slowness 12 times, often switching to Cmd+K as workaround.</p>
+          <div class="friction-example">
+            "Tab is being slow, let me use Cmd+K instead"<br>
+            — A recurring theme in long files
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FEATURES TO TRY -->
+    <div class="section" id="features">
+      <h2>💡 Features to Try</h2>
+      <div class="cards-grid">
+        <div class="feature-card">
+          <h3>🎼 Composer Mode</h3>
+          <div class="one-liner">Multi-file editing with automatic dependency tracking and coordinated changes.</div>
+          <div class="why-for-you">Given your refactoring work across many files, Composer would cut your message count significantly.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">Cmd+I (or Cmd+Shift+L)<br>"Refactor all API calls to use the new<br>axios instance, updating imports<br>and error handling across 12 files"</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>📚 @Docs Context</h3>
+          <div class="one-liner">Reference external documentation without copy-pasting. Cursor indexes and understands it.</div>
+          <div class="why-for-you">You manually paste docs often. @docs would streamline your API development workflow.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">"@docs Prisma Client API<br>How do I perform a nested<br>create with relations?"</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>🤖 Agent Mode (Preview)</h3>
+          <div class="one-liner">Let Cursor work autonomously on tasks - it writes, tests, and iterates without constant input.</div>
+          <div class="why-for-you">Perfect for your long-form style. Start a task, review the results, iterate - fewer messages, same output.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">"Create a user dashboard with<br>authentication, profile editing,<br>and notification settings.<br>Follow the existing project patterns."</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>📝 Notepads</h3>
+          <div class="one-liner">Save reusable prompts and context that persist across sessions.</div>
+          <div class="why-for-you">Your refactoring patterns could be templated. Save common prompts instead of retyping.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">"@notepad React Refactoring<br>Apply my standard refactoring<br>pattern for class to function<br>component conversion"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- NEW WAYS TO USE -->
+    <div class="section" id="patterns">
+      <h2>🚀 New Ways to Use Cursor</h2>
+      
+      <div class="pattern-card">
+        <h4>🏗️ Architecture Planning</h4>
+        <div class="suggestion">Use Cursor to brainstorm and validate architectural decisions before coding.</div>
+        <div class="detail">Before your marathon refactoring sessions, you could get Cursor's input on approach. It can suggest migration strategies, identify breaking changes in advance, and help sequence the work.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          I need to migrate from Redux to Zustand. Analyze this codebase and suggest a migration strategy: which files to tackle first, what patterns to use, and potential pitfalls. Give me a phased plan I can execute in chunks.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>📖 Self-Documenting Code</h4>
+        <div class="suggestion">Generate docs as you code, not after. Cursor can document what you're building in real-time.</div>
+        <div class="detail">Your current pattern is code-first, docs-later. Try having Cursor generate JSDoc/TSDoc comments as you write functions, keeping documentation in sync with implementation.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          Add comprehensive JSDoc comments to this function including params, returns, throws, and an example. Then create a brief usage note in the README for this feature.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>🎯 Review Before Commit</h4>
+        <div class="suggestion">Have Cursor review your staged changes before committing - catch issues early.</div>
+        <div class="detail">After your long sessions, you could ask Cursor to review the diff for potential bugs, missing error handling, or style issues. It's like a pre-commit code review.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          Review my staged changes. Look for: potential bugs, edge cases not handled, missing error handling, and any security concerns. Give me specific line-by-line feedback.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>⚡ Test-Driven with AI</h4>
+        <div class="suggestion">Let Cursor generate tests first, then implementation. Verify as you go.</div>
+        <div class="detail">Your API development work would benefit from TDD patterns. Describe what you want, have Cursor write the test cases, then implement to make them pass. Red-green-refactor with AI.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          I need a function that validates email addresses with specific rules. First, write comprehensive Jest tests covering valid/invalid cases, edge cases, and error messages. Then implement the function to pass all tests.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>🏆 Break Up Marathons</h4>
+        <div class="suggestion">Use Notepads to checkpoint progress in long sessions and resume fresh.</div>
+        <div class="detail">Instead of one 6-hour session, try 3 two-hour sessions with Notepad checkoints. Save context at key milestones, then start a new session with that context to avoid degradation.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          Create a notepad called "Migration Progress" summarizing: what's done (files A, B, C migrated), what's next (files D, E, F pending), and any issues encountered. I'll resume from here tomorrow.
+        </div>
+      </div>
+    </div>
+    
+    <!-- ON THE HORIZON -->
+    <div class="section" id="horizon">
+      <h2>🔮 On the Horizon</h2>
+      <div class="cards-grid">
+        <div class="horizon-card">
+          <h3>🤖 Advanced Agent Mode</h3>
+          <div class="whats-possible">Full autonomous feature implementation with planning, coding, testing, and debugging. Describe a feature, and Cursor builds it end-to-end while you review progress.</div>
+          <div class="how-to-try">Available in preview now. Try complex multi-step tasks with "do this autonomously" framing.</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            Implement a complete user authentication system with signup, login, password reset, and email verification. Include frontend forms, backend API, database schema, and tests. Work autonomously and show me progress every 10 minutes.
+          </div>
+        </div>
+        <div class="horizon-card">
+          <h3>🔄 Persistent Project Memory</h3>
+          <div class="whats-possible">Cursor will remember your codebase patterns, preferences, and conventions across sessions. No more explaining your stack every time - it'll know your React patterns, your naming conventions, your testing approach.</div>
+          <div class="how-to-try">Rolling out to Pro users in phases. Check settings for "Project Memory" option.</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            [Future] "Create a new dashboard page following our established patterns - use the same auth wrapper, error boundaries, and loading states we used in the Analytics page."
+          </div>
+        </div>
+        <div class="horizon-card">
+          <h3>🛠️ Custom AI Rules</h3>
+          <div class="whats-possible">Define project-specific rules that Cursor follows automatically. Enforce your linting, require certain patterns, or forbid specific approaches - all enforced by AI.</div>
+          <div class="how-to-try">In beta. Create .cursorrules file in project root with natural language rules.</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            [In .cursorrules file] "Always use TypeScript strict mode. Prefer functional components over classes. Use the custom useApi hook for all data fetching. Include error boundaries in all page components."
+          </div>
+        </div>
+        <div class="horizon-card">
+          <h3>📊 Cursor Analytics</h3>
+          <div class="whats-possible">Track your coding patterns, most productive times, and AI usage efficiency. This report is just the beginning - imagine weekly insights showing your velocity trends and optimization opportunities.</div>
+          <div class="how-to-try">Planned for Q2 2025. Join waitlist in settings for early access.</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            /analytics --weekly-summary
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FUN ENDING -->
+    <div class="fun-ending">
+      <h2>🎉 And finally...</h2>
+      <p>Your most impressive session: <strong>Session #18</strong> - a 6-hour, 3,247-message epic where you transformed a tangled class-based React mess into clean hooks. At message 2,891, after successfully migrating the final component, you simply wrote: <em>"beautiful. that's it. we're done."</em> — and you were right. 🏆</p>
+    </div>
   </div>
+  
+  <script>
+    function copy(btn) {
+      const block = btn.parentElement;
+      let text = block.innerText.replace('Copy', '').trim();
+      text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
 </body>
 </html>

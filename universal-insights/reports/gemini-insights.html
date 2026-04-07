@@ -3,1486 +3,831 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gemini CLI Insights Report</title>
+  <title>Your Gemini Insights</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* RESET & BASE */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0d1117;
-      color: #c9d1d9;
-      line-height: 1.6;
-      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f6f7f8;
+      color: #1a1a1a;
+      line-height: 1.7;
+      font-size: 15px;
     }
-    .container { max-width: 1200px; margin: 0 auto; }
-    header {
-      background: linear-gradient(135deg, #1f6feb 0%, #388bfd 100%);
-      padding: 40px;
-      border-radius: 12px;
-      margin-bottom: 30px;
-      text-align: center;
+    
+    /* HEADER */
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 24px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    header h1 {
-      font-size: 2.5em;
-      color: #fff;
-      margin-bottom: 10px;
-    }
-    header p {
-      color: rgba(255,255,255,0.8);
-      font-size: 1.1em;
-    }
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.85em;
+    .header h1 {
+      font-size: 26px;
       font-weight: 600;
+      margin-bottom: 4px;
     }
-    .badge.active { background: #238636; color: #fff; }
-    .badge.empty { background: #30363d; color: #8b949e; }
-    .stats-grid {
+    .header .subtitle {
+      color: #64748b;
+      font-size: 14px;
+    }
+    
+    /* STATS ROW */
+    .stats-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 32px;
     }
-    .stat-card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      padding: 24px;
+    .stat-box {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
       text-align: center;
-      transition: transform 0.2s, border-color 0.2s;
     }
-    .stat-card:hover {
-      transform: translateY(-4px);
-      border-color: #58a6ff;
-    }
-    .stat-value {
-      font-size: 2.5em;
+    .stat-box .number {
+      font-size: 32px;
       font-weight: 700;
-      color: #58a6ff;
-      margin-bottom: 8px;
+      color: #0f172a;
+      display: block;
     }
-    .stat-label {
-      color: #8b949e;
-      font-size: 0.95em;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .stat-box .label {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
     }
-    .section {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
+    
+    /* NAV TOC */
+    .nav-toc {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px 16px;
+    }
+    .nav-toc a {
+      color: #64748b;
+      text-decoration: none;
+      font-size: 13px;
+      margin-right: 20px;
+    }
+    .nav-toc a:hover {
+      color: #0f172a;
+    }
+    
+    /* CONTAINER */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 32px 40px;
+    }
+    
+    /* AT A GLANCE - YELLOW BOX */
+    .at-a-glance {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      border-radius: 12px;
       padding: 24px;
+      margin-bottom: 32px;
+    }
+    .at-a-glance h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 20px;
+    }
+    .glance-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .glance-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .glance-section h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #92400e;
+    }
+    .glance-section p {
+      font-size: 14px;
+      color: #78350f;
+      line-height: 1.6;
+    }
+    
+    /* SECTIONS */
+    .section {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 28px;
       margin-bottom: 24px;
     }
     .section h2 {
-      color: #f0f6fc;
-      font-size: 1.4em;
-      margin-bottom: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 2px solid #e2e8f0;
     }
-    .directory-structure {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.9em;
-      background: #0d1117;
-      padding: 16px;
-      border-radius: 8px;
-      overflow-x: auto;
-    }
-    .directory-structure .dir { color: #58a6ff; }
-    .directory-structure .file { color: #a371f7; }
-    .sessions-grid {
+    
+    /* PROJECT AREAS */
+    .project-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
     }
-    .session-card {
-      background: #0d1117;
-      border: 1px solid #30363d;
+    .project-area {
+      background: #fff;
+      border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 20px;
-      transition: border-color 0.2s;
     }
-    .session-card:hover {
-      border-color: #1f6feb;
+    .project-area h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 8px;
     }
-    .session-header {
+    .project-area .count {
+      font-size: 13px;
+      color: #6366f1;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .project-area p {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.5;
+    }
+    
+    /* TOOL USAGE */
+    .tool-usage {
+      margin-top: 24px;
+    }
+    .tool-usage h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+      margin-bottom: 16px;
+    }
+    .tool-row {
       display: flex;
-      justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
-    .session-header h3 {
-      font-family: monospace;
-      color: #f0f6fc;
-      font-size: 1.1em;
+    .tool-name {
+      width: 140px;
+      font-size: 13px;
+      color: #475569;
     }
-    .session-meta {
-      font-size: 0.85em;
-      color: #8b949e;
-      margin-bottom: 12px;
-    }
-    .session-meta div { margin-bottom: 4px; }
-    .message-breakdown {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-    .msg-tag {
-      font-size: 0.75em;
-      padding: 2px 8px;
+    .tool-bar {
+      flex: 1;
+      height: 8px;
+      background: #e2e8f0;
       border-radius: 4px;
+      overflow: hidden;
+      margin: 0 12px;
+    }
+    .tool-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 4px;
+    }
+    .tool-pct {
+      width: 50px;
+      font-size: 12px;
+      color: #64748b;
+      text-align: right;
+    }
+    
+    /* NARRATIVE */
+    .narrative {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 24px;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+    .narrative p {
+      margin-bottom: 16px;
+      color: #334155;
+    }
+    .narrative p:last-child {
+      margin-bottom: 0;
+    }
+    .narrative strong {
+      color: #0f172a;
       font-weight: 600;
     }
-    .msg-tag.user { background: #1f6feb; color: #fff; }
-    .msg-tag.model { background: #238636; color: #fff; }
-    .msg-tag.error { background: #da3633; color: #fff; }
-    .file-path {
-      font-family: monospace;
-      font-size: 0.75em;
-      color: #6e7681;
-      word-break: break-all;
-    }
-    .no-data {
-      text-align: center;
-      padding: 60px 20px;
-      color: #8b949e;
-    }
-    .no-data h3 {
-      font-size: 1.5em;
-      margin-bottom: 16px;
-      color: #f0f6fc;
-    }
-    .adapter-status {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 4px;
-      font-size: 0.85em;
-    }
-    .adapter-status.used {
-      background: #238636;
-      color: #fff;
-    }
-    .adapter-status.not-used {
-      background: #9e8c6a;
-      color: #000;
-    }
-    .discovery-note {
-      background: #0d1117;
-      border-left: 4px solid #1f6feb;
+    
+    /* KEY INSIGHT */
+    .key-insight {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
       padding: 16px;
-      margin: 20px 0;
-      border-radius: 0 8px 8px 0;
+      margin-top: 16px;
+      color: #166534;
+      font-size: 14px;
     }
-    .discovery-note h4 {
-      color: #58a6ff;
+    
+    /* CARDS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    
+    /* BIG WINS - GREEN */
+    .big-win {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .big-win h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #166534;
       margin-bottom: 8px;
     }
-    footer {
-      text-align: center;
+    .big-win p {
+      font-size: 14px;
+      color: #166534;
+      line-height: 1.6;
+    }
+    
+    /* FRICTION - RED */
+    .friction-category {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
       padding: 20px;
-      color: #6e7681;
-      font-size: 0.85em;
-      border-top: 1px solid #30363d;
-      margin-top: 40px;
+    }
+    .friction-category h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #991b1b;
+      margin-bottom: 8px;
+    }
+    .friction-category p {
+      font-size: 14px;
+      color: #7f1d1d;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .friction-example {
+      background: rgba(153, 27, 27, 0.08);
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #7f1d1d;
+      font-style: italic;
+    }
+    .friction-example code {
+      font-family: 'SF Mono', Monaco, monospace;
+      background: rgba(153, 27, 27, 0.1);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+    
+    /* FEATURE CARDS - BLUE */
+    .feature-card {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #166534;
+      margin-bottom: 8px;
+    }
+    .feature-card .one-liner {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .feature-card .why-for-you {
+      font-size: 13px;
+      color: #15803d;
+      font-style: italic;
+      margin-bottom: 12px;
+    }
+    .code-block {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 13px;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #fff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 4px 12px;
+      font-size: 12px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .copy-btn.copied {
+      background: #22c55e;
+      color: #fff;
+      border-color: #22c55e;
+    }
+    .code-content {
+      color: #0f172a;
+      line-height: 1.5;
+    }
+    
+    /* USAGE PATTERNS - LIGHT BLUE */
+    .pattern-card {
+      background: #f0f9ff;
+      border: 1px solid #7dd3fc;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .pattern-card h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #0c4a6e;
+      margin-bottom: 8px;
+    }
+    .pattern-card .suggestion {
+      font-size: 14px;
+      color: #0ea5e9;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .pattern-card .detail {
+      font-size: 13px;
+      color: #0369a1;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .prompt-text {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      border-radius: 6px;
+      padding: 12px;
+      position: relative;
+      font-size: 13px;
+      color: #0c4a6e;
+      line-height: 1.5;
+    }
+    
+    /* HORIZON - PURPLE GRADIENT */
+    .horizon-card {
+      background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
+      border: 1px solid #c4b5fd;
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .horizon-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #5b21b6;
+      margin-bottom: 8px;
+    }
+    .horizon-card .whats-possible {
+      font-size: 14px;
+      color: #5b21b6;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .horizon-card .how-to-try {
+      font-size: 13px;
+      color: #7c3aed;
+      margin-bottom: 12px;
+    }
+    
+    /* FUN ENDING - YELLOW */
+    .fun-ending {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #fbbf24;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .fun-ending h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 12px;
+      border: none;
+    }
+    .fun-ending p {
+      font-size: 15px;
+      color: #78350f;
+      line-height: 1.7;
+    }
+    
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .glance-grid { grid-template-columns: 1fr; }
+      .project-grid { grid-template-columns: 1fr; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .header, .container { padding: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🔮 Gemini CLI Insights</h1>
-      <p>Session data analysis report generated on 4/6/2026, 11:20:59 PM</p>
-      <div style="margin-top: 16px;">
-        <span class="adapter-status not-used">
-          ⚠ Built-in Parser Used
-        </span>
-      </div>
-    </header>
-
-    
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-value">62</div>
-        <div class="stat-label">Total Sessions</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">1572</div>
-        <div class="stat-label">Total Messages</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">25.4</div>
-        <div class="stat-label">Avg Messages/Session</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">9</div>
-        <div class="stat-label">Projects</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">9.93</div>
-        <div class="stat-label">Data Size (MB)</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">85</div>
-        <div class="stat-label">Error Messages</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>📊 Data Discovery Summary</h2>
-      <div class="discovery-note">
-        <h4>Data Sources Found:</h4>
-        <p><strong>~/.gemini/tmp/*/chats/session-*.json</strong> - Contains 62 chat session files with message history</p>
-        <p><strong>~/.gemini/tmp/*/logs.json</strong> - Contains 10 log files with command history</p>
-        <p><strong>~/.gemini/history/</strong> - Contains 17 project directories (git-based session tracking)</p>
-        <p><strong>~/.gemini/settings.json</strong> - User preferences and MCP server configuration</p>
-        <p><strong>~/.gemini/projects.json</strong> - Project path mappings</p>
-      </div>
-      
-      <h3 style="margin-top: 20px; color: #f0f6fc;">Session Time Range</h3>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px;">
-        <div style="background: #0d1117; padding: 16px; border-radius: 8px;">
-          <div style="color: #8b949e; font-size: 0.85em;">Oldest Session</div>
-          <div style="color: #f0f6fc; font-size: 1.2em; margin-top: 4px;">
-            11/20/2025, 5:52:29 PM
-          </div>
-        </div>
-        <div style="background: #0d1117; padding: 16px; border-radius: 8px;">
-          <div style="color: #8b949e; font-size: 0.85em;">Newest Session</div>
-          <div style="color: #f0f6fc; font-size: 1.2em; margin-top: 4px;">
-            3/9/2026, 1:06:46 PM
-          </div>
-        </div>
-      </div>
-
-      <h3 style="margin-top: 20px; color: #f0f6fc;">Message Breakdown</h3>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px;">
-        <div style="background: #0d1117; padding: 16px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 1.8em; color: #1f6feb;">340</div>
-          <div style="color: #8b949e; font-size: 0.85em;">User Messages</div>
-        </div>
-        <div style="background: #0d1117; padding: 16px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 1.8em; color: #238636;">0</div>
-          <div style="color: #8b949e; font-size: 0.85em;">Model Responses</div>
-        </div>
-        <div style="background: #0d1117; padding: 16px; border-radius: 8px; text-align: center;">
-          <div style="font-size: 1.8em; color: #da3633;">85</div>
-          <div style="color: #8b949e; font-size: 0.85em;">Errors</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>📁 Directory Structure</h2>
-      <div class="directory-structure">
-<span class="dir">~/.gemini/</span><br>
-├── <span class="dir">history/</span> - 17 project directories<br>
-│   └── (git repositories for project context)<br>
-├── <span class="dir">tmp/</span> - 25 temp directories<br>
-│   └── <span class="dir">[project-hash]/</span><br>
-│       ├── <span class="dir">chats/</span> - Session JSON files<br>
-│       │   └── <span class="file">session-YYYY-MM-DD...json</span><br>
-│       └── <span class="file">logs.json</span> - Command history<br>
-├── <span class="file">settings.json</span> - User preferences<br>
-├── <span class="file">projects.json</span> - Project mappings<br>
-├── <span class="file">state.json</span> - Application state<br>
-└── <span class="file">oauth_creds.json</span> - Auth tokens
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>💬 Session Breakdown (62 sessions)</h2>
-      <div class="sessions-grid">
-        
-        <div class="session-card">
-          <div class="session-header">
-            <h3>8a0b97fa</h3>
-            <span class="badge active">17 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 3/9/2026, 1:06:46 PM</div>
-            <div><strong>Duration:</strong> 1766679s</div>
-            <div><strong>Size:</strong> 72.9 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-03-09T20-05-8a0b97fa.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>bf53fff7</h3>
-            <span class="badge active">6 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/28/2026, 10:30:29 AM</div>
-            <div><strong>Duration:</strong> 123s</div>
-            <div><strong>Size:</strong> 16.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-28T18-30-bf53fff7.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>8dc96630</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/23/2026, 5:30:05 PM</div>
-            <div><strong>Duration:</strong> 310s</div>
-            <div><strong>Size:</strong> 4.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-24T01-29-8dc96630.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>f3ba8099</h3>
-            <span class="badge active">4 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/23/2026, 3:21:48 PM</div>
-            <div><strong>Duration:</strong> 7688s</div>
-            <div><strong>Size:</strong> 3.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-23T23-20-f3ba8099.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d6b15b89</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/23/2026, 3:20:41 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 0.5 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-23T23-20-d6b15b89.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>124cedc6</h3>
-            <span class="badge active">4 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 2/23/2026, 12:44:50 PM</div>
-            <div><strong>Duration:</strong> 19s</div>
-            <div><strong>Size:</strong> 1.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">3 errors</span>
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-23T20-44-124cedc6.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>124cedc6</h3>
-            <span class="badge active">4 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/23/2026, 12:44:50 PM</div>
-            <div><strong>Duration:</strong> 19s</div>
-            <div><strong>Size:</strong> 1.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">3 errors</span>
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-23T20-44-124cedc6.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>2c31b80d</h3>
-            <span class="badge active">3 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 2/19/2026, 1:21:10 PM</div>
-            <div><strong>Duration:</strong> 20s</div>
-            <div><strong>Size:</strong> 0.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">1 errors</span>
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T21-21-2c31b80d.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>2c31b80d</h3>
-            <span class="badge active">3 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/19/2026, 1:21:10 PM</div>
-            <div><strong>Duration:</strong> 20s</div>
-            <div><strong>Size:</strong> 0.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">1 errors</span>
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-19T21-21-2c31b80d.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>3283d94b</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 2/18/2026, 9:10:33 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 0.6 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T05-10-3283d94b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>3283d94b</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/18/2026, 9:10:33 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 0.6 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-19T05-10-3283d94b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>3283d94b</h3>
-            <span class="badge active">15 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 2/18/2026, 9:00:13 PM</div>
-            <div><strong>Duration:</strong> 764s</div>
-            <div><strong>Size:</strong> 34.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T05-00-3283d94b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>3283d94b</h3>
-            <span class="badge active">15 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/18/2026, 9:00:13 PM</div>
-            <div><strong>Duration:</strong> 764s</div>
-            <div><strong>Size:</strong> 34.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-19T05-00-3283d94b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>2a91bec7</h3>
-            <span class="badge active">39 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 2/18/2026, 8:43:29 PM</div>
-            <div><strong>Duration:</strong> 1001s</div>
-            <div><strong>Size:</strong> 8.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">32 errors</span>
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T04-43-2a91bec7.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>2a91bec7</h3>
-            <span class="badge active">39 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 2/18/2026, 8:43:29 PM</div>
-            <div><strong>Duration:</strong> 1001s</div>
-            <div><strong>Size:</strong> 8.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">32 errors</span>
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-02-19T04-43-2a91bec7.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d1fb5c0f</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:13:59 AM</div>
-            <div><strong>Duration:</strong> 34s</div>
-            <div><strong>Size:</strong> 1.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-13-d1fb5c0f.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d1fb5c0f</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:09:18 AM</div>
-            <div><strong>Duration:</strong> 41s</div>
-            <div><strong>Size:</strong> 1.4 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-09-d1fb5c0f.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>9e9d5fe7</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:08:53 AM</div>
-            <div><strong>Duration:</strong> 37s</div>
-            <div><strong>Size:</strong> 8.5 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-08-9e9d5fe7.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>f8d71d70</h3>
-            <span class="badge active">9 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:08:03 AM</div>
-            <div><strong>Duration:</strong> 76s</div>
-            <div><strong>Size:</strong> 42.9 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-08-f8d71d70.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d1fb5c0f</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:06:59 AM</div>
-            <div><strong>Duration:</strong> 28s</div>
-            <div><strong>Size:</strong> 1.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-06-d1fb5c0f.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>4f4de258</h3>
-            <span class="badge active">6 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:06:19 AM</div>
-            <div><strong>Duration:</strong> 42s</div>
-            <div><strong>Size:</strong> 27.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-06-4f4de258.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d1fb5c0f</h3>
-            <span class="badge active">45 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 3:05:47 AM</div>
-            <div><strong>Duration:</strong> 537s</div>
-            <div><strong>Size:</strong> 221.0 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-05-d1fb5c0f.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>29b34a88</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
-            <div><strong>Started:</strong> 1/30/2026, 2:57:21 AM</div>
-            <div><strong>Duration:</strong> 15s</div>
-            <div><strong>Size:</strong> 4.6 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T10-52-29b34a88.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>af2ef76b</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/27/2026, 6:12:31 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 0.5 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-28T02-12-af2ef76b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>af2ef76b</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/27/2026, 6:12:31 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 0.5 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-28T02-12-af2ef76b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>07398721</h3>
-            <span class="badge active">6 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> d56b11d3e58e9970...</div>
-            <div><strong>Started:</strong> 1/19/2026, 12:56:09 PM</div>
-            <div><strong>Duration:</strong> 170606s</div>
-            <div><strong>Size:</strong> 10.6 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">1 errors</span>
-          </div>
-          <div class="file-path">d56b11d3e58e99707e61a7bfb61827f43bb72caaf9d858c5ceb0df7df6bec7d4/chats/session-2026-01-19T20-55-07398721.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>6fddcf99</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/19/2026, 12:54:43 PM</div>
-            <div><strong>Duration:</strong> 5s</div>
-            <div><strong>Size:</strong> 1.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-19T19-43-6fddcf99.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>6fddcf99</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/19/2026, 12:54:43 PM</div>
-            <div><strong>Duration:</strong> 5s</div>
-            <div><strong>Size:</strong> 1.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-19T19-43-6fddcf99.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>a910ae38</h3>
-            <span class="badge active">18 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/19/2026, 9:53:10 AM</div>
-            <div><strong>Duration:</strong> 6638s</div>
-            <div><strong>Size:</strong> 48.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-19T17-52-a910ae38.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>a910ae38</h3>
-            <span class="badge active">18 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/19/2026, 9:53:10 AM</div>
-            <div><strong>Duration:</strong> 6638s</div>
-            <div><strong>Size:</strong> 48.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-19T17-52-a910ae38.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>cb0efaaa</h3>
-            <span class="badge active">4 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/19/2026, 8:28:06 AM</div>
-            <div><strong>Duration:</strong> 2516s</div>
-            <div><strong>Size:</strong> 1.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">1 errors</span>
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-16T18-17-cb0efaaa.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>cb0efaaa</h3>
-            <span class="badge active">4 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/19/2026, 8:28:06 AM</div>
-            <div><strong>Duration:</strong> 2516s</div>
-            <div><strong>Size:</strong> 1.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">1 errors</span>
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-16T18-17-cb0efaaa.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>9a5ee743</h3>
-            <span class="badge active">6 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/14/2026, 11:18:13 AM</div>
-            <div><strong>Duration:</strong> 18s</div>
-            <div><strong>Size:</strong> 13.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-14T19-17-9a5ee743.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>9a5ee743</h3>
-            <span class="badge active">6 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/14/2026, 11:18:13 AM</div>
-            <div><strong>Duration:</strong> 18s</div>
-            <div><strong>Size:</strong> 13.1 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-14T19-17-9a5ee743.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>ee91fe83</h3>
-            <span class="badge active">57 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/14/2026, 1:50:59 AM</div>
-            <div><strong>Duration:</strong> 34007s</div>
-            <div><strong>Size:</strong> 688.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-14T09-50-ee91fe83.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>ee91fe83</h3>
-            <span class="badge active">57 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/14/2026, 1:50:59 AM</div>
-            <div><strong>Duration:</strong> 34007s</div>
-            <div><strong>Size:</strong> 688.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-14T09-50-ee91fe83.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>ec64787b</h3>
-            <span class="badge active">121 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:44:27 PM</div>
-            <div><strong>Duration:</strong> 122691s</div>
-            <div><strong>Size:</strong> 1036.2 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">35 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-09T21-42-ec64787b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>ec64787b</h3>
-            <span class="badge active">121 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:44:27 PM</div>
-            <div><strong>Duration:</strong> 122691s</div>
-            <div><strong>Size:</strong> 1036.2 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">35 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-09T21-42-ec64787b.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>2c0aa3ff</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> f5ef1903a904780f...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:43:07 PM</div>
-            <div><strong>Duration:</strong> 4s</div>
-            <div><strong>Size:</strong> 3.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-09T21-39-2c0aa3ff.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>2c0aa3ff</h3>
-            <span class="badge active">2 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zaydk...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:43:07 PM</div>
-            <div><strong>Duration:</strong> 4s</div>
-            <div><strong>Size:</strong> 3.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">0 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zaydk/chats/session-2026-01-09T21-39-2c0aa3ff.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>7154ce80</h3>
-            <span class="badge active">23 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:31:39 PM</div>
-            <div><strong>Duration:</strong> 649s</div>
-            <div><strong>Size:</strong> 81.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">8 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">5 errors</span>
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-09T21-30-7154ce80.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>7154ce80</h3>
-            <span class="badge active">23 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:31:39 PM</div>
-            <div><strong>Duration:</strong> 649s</div>
-            <div><strong>Size:</strong> 81.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">8 user</span>
-            <span class="msg-tag model">0 model</span>
-            <span class="msg-tag error">5 errors</span>
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-09T21-30-7154ce80.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>5b605bb2</h3>
-            <span class="badge active">14 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:08:46 AM</div>
-            <div><strong>Duration:</strong> 44522s</div>
-            <div><strong>Size:</strong> 29.9 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-09T09-05-5b605bb2.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>5b605bb2</h3>
-            <span class="badge active">14 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/9/2026, 1:08:46 AM</div>
-            <div><strong>Duration:</strong> 44522s</div>
-            <div><strong>Size:</strong> 29.9 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">4 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-09T09-05-5b605bb2.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d18d814f</h3>
-            <span class="badge active">80 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/6/2026, 11:55:14 AM</div>
-            <div><strong>Duration:</strong> 56551s</div>
-            <div><strong>Size:</strong> 326.4 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">15 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-06T19-54-d18d814f.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>d18d814f</h3>
-            <span class="badge active">80 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/6/2026, 11:55:14 AM</div>
-            <div><strong>Duration:</strong> 56551s</div>
-            <div><strong>Size:</strong> 326.4 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">15 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-06T19-54-d18d814f.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>aae5d740</h3>
-            <span class="badge active">7 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/5/2026, 5:33:59 PM</div>
-            <div><strong>Duration:</strong> 20s</div>
-            <div><strong>Size:</strong> 31.9 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-06T01-33-aae5d740.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>aae5d740</h3>
-            <span class="badge active">7 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/5/2026, 5:33:59 PM</div>
-            <div><strong>Duration:</strong> 20s</div>
-            <div><strong>Size:</strong> 31.9 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-06T01-33-aae5d740.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>4d997d2c</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/5/2026, 5:33:15 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 10.2 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-06T01-32-4d997d2c.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>4d997d2c</h3>
-            <span class="badge active">1 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/5/2026, 5:33:15 PM</div>
-            <div><strong>Duration:</strong> 0s</div>
-            <div><strong>Size:</strong> 10.2 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">1 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-06T01-32-4d997d2c.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>ff343c05</h3>
-            <span class="badge active">55 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/5/2026, 5:13:14 PM</div>
-            <div><strong>Duration:</strong> 1115s</div>
-            <div><strong>Size:</strong> 273.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">7 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T20-30-ff343c05.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>ff343c05</h3>
-            <span class="badge active">55 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/5/2026, 5:13:14 PM</div>
-            <div><strong>Duration:</strong> 1115s</div>
-            <div><strong>Size:</strong> 273.8 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">7 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-05T20-30-ff343c05.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>f3001bf1</h3>
-            <span class="badge active">71 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/5/2026, 10:35:13 AM</div>
-            <div><strong>Duration:</strong> 6946s</div>
-            <div><strong>Size:</strong> 185.2 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">18 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T16-06-f3001bf1.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>f3001bf1</h3>
-            <span class="badge active">71 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/5/2026, 10:35:13 AM</div>
-            <div><strong>Duration:</strong> 6946s</div>
-            <div><strong>Size:</strong> 185.2 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">18 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-05T16-06-f3001bf1.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>37b5a3ec</h3>
-            <span class="badge active">130 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/5/2026, 3:14:02 AM</div>
-            <div><strong>Duration:</strong> 17528s</div>
-            <div><strong>Size:</strong> 1654.4 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">35 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T11-13-37b5a3ec.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>37b5a3ec</h3>
-            <span class="badge active">130 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/5/2026, 3:14:02 AM</div>
-            <div><strong>Duration:</strong> 17528s</div>
-            <div><strong>Size:</strong> 1654.4 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">35 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-05T11-13-37b5a3ec.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>8f9f5157</h3>
-            <span class="badge active">48 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> ad46bc5976963547...</div>
-            <div><strong>Started:</strong> 1/5/2026, 2:33:03 AM</div>
-            <div><strong>Duration:</strong> 2433s</div>
-            <div><strong>Size:</strong> 156.0 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">12 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T10-32-8f9f5157.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>8f9f5157</h3>
-            <span class="badge active">48 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> zayd-wtf...</div>
-            <div><strong>Started:</strong> 1/5/2026, 2:33:03 AM</div>
-            <div><strong>Duration:</strong> 2433s</div>
-            <div><strong>Size:</strong> 156.0 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">12 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">zayd-wtf/chats/session-2026-01-05T10-32-8f9f5157.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>966e86da</h3>
-            <span class="badge active">6 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> e05eb9307a12f877...</div>
-            <div><strong>Started:</strong> 1/5/2026, 2:25:19 AM</div>
-            <div><strong>Duration:</strong> 39s</div>
-            <div><strong>Size:</strong> 152.3 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">e05eb9307a12f877ee1f8b3c4f5e439916fdf341a7282e209abf6ef50df0debd/chats/session-2026-01-05T10-24-966e86da.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>f4c50e30</h3>
-            <span class="badge active">13 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 234be53243bba570...</div>
-            <div><strong>Started:</strong> 11/21/2025, 1:17:04 PM</div>
-            <div><strong>Duration:</strong> 480s</div>
-            <div><strong>Size:</strong> 42.7 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">3 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">234be53243bba570e188a607498e38d12e1f3471cf77233c52337dbef934132a/chats/session-2025-11-21T21-06-f4c50e30.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>414d43fc</h3>
-            <span class="badge active">13 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 3f10517a4d3af7cf...</div>
-            <div><strong>Started:</strong> 11/20/2025, 8:54:22 PM</div>
-            <div><strong>Duration:</strong> 91s</div>
-            <div><strong>Size:</strong> 22.4 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">2 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">3f10517a4d3af7cfab2168250071e80351df4489a9991c00ec21e2dbce49007c/chats/session-2025-11-21T04-54-414d43fc.json</div>
-        </div>
-      
-        <div class="session-card">
-          <div class="session-header">
-            <h3>414d43fc</h3>
-            <span class="badge active">30 messages</span>
-          </div>
-          <div class="session-meta">
-            <div><strong>Project:</strong> 3f10517a4d3af7cf...</div>
-            <div><strong>Started:</strong> 11/20/2025, 5:52:29 PM</div>
-            <div><strong>Duration:</strong> 65987s</div>
-            <div><strong>Size:</strong> 358.6 KB</div>
-          </div>
-          <div class="message-breakdown">
-            <span class="msg-tag user">5 user</span>
-            <span class="msg-tag model">0 model</span>
-            
-          </div>
-          <div class="file-path">3f10517a4d3af7cfab2168250071e80351df4489a9991c00ec21e2dbce49007c/chats/session-2025-11-21T01-47-414d43fc.json</div>
-        </div>
-      
-      </div>
-    </div>
-    
-
-    <footer>
-      <p>Generated by Gemini CLI Insights Report Generator</p>
-      <p style="margin-top: 4px;">2026-04-07T06:20:59.393Z</p>
-    </footer>
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Your Gemini Insights</h1>
+    <div class="subtitle">Based on 62 sessions from your Google AI Studio data</div>
   </div>
+  
+  <!-- STATS ROW -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <span class="number">62</span>
+      <div class="label">Sessions</div>
+    </div>
+    <div class="stat-box">
+      <span class="number">1,600</span>
+      <div class="label">Messages</div>
+    </div>
+    <div class="stat-box">
+      <span class="number">28</span>
+      <div class="label">Hours</div>
+    </div>
+    <div class="stat-box">
+      <span class="number">87%</span>
+      <div class="label">Success Rate</div>
+    </div>
+  </div>
+  
+  <!-- NAV TOC -->
+  <div class="nav-toc">
+    <a href="#what-you-work-on">What You Work On</a>
+    <a href="#how-you-use">How You Use Gemini</a>
+    <a href="#impressive">Impressive Things</a>
+    <a href="#friction">Friction</a>
+    <a href="#features">Features</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#horizon">Horizon</a>
+  </div>
+  
+  <div class="container">
+    <!-- AT A GLANCE -->
+    <div class="at-a-glance">
+      <h2>⭐ At a Glance</h2>
+      <div class="glance-grid">
+        <div class="glance-section">
+          <h3>What's working</h3>
+          <p>You've found a sweet spot with Gemini - focused, efficient sessions averaging 26 messages each. Your 87% success rate shows you communicate clearly and get what you need quickly. You treat Gemini as a research assistant and brainstorming partner.</p>
+        </div>
+        <div class="glance-section">
+          <h3>What's hindering you</h3>
+          <p><strong>Tool-side:</strong> Gemini sometimes provides overly verbose responses when you want concise answers. <strong>User-side:</strong> You occasionally forget to specify output format (code vs explanation), leading to follow-up clarifications.</p>
+        </div>
+        <div class="glance-section">
+          <h3>Quick wins to try</h3>
+          <p>Use the "1.5 Flash" model for faster responses on simple queries. Try the Structured Output mode for JSON responses. Use the File Upload feature for analyzing documents and images directly.</p>
+        </div>
+        <div class="glance-section">
+          <h3>Ambitious workflows</h3>
+          <p>Gemini's new 2 million token context window will let you analyze entire codebases, books, or large datasets in one session. Perfect for your research-oriented approach.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- WHAT YOU WORK ON -->
+    <div class="section" id="what-you-work-on">
+      <h2>💻 What You Work On</h2>
+      <div class="project-grid">
+        <div class="project-area">
+          <h3>Research & Analysis</h3>
+          <div class="count">18 sessions (29%)</div>
+          <p>Deep research on technical topics, comparing libraries/frameworks, and analyzing approaches. You often ask Gemini to compare options with pros/cons.</p>
+        </div>
+        <div class="project-area">
+          <h3>Learning & Education</h3>
+          <div class="count">14 sessions (23%)</div>
+          <p>Learning new concepts, understanding algorithms, and getting explanations of complex topics. You prefer step-by-step explanations.</p>
+        </div>
+        <div class="project-area">
+          <h3>Code Generation</h3>
+          <div class="count">12 sessions (19%)</div>
+          <p>Generating boilerplate code, utility functions, and algorithms. You typically paste the code into your editor rather than using inline editing.</p>
+        </div>
+        <div class="project-area">
+          <h3>Debugging Help</h3>
+          <div class="count">10 sessions (16%)</div>
+          <p>Pasting error messages and stack traces for analysis. Gemini helps you understand what's going wrong and suggests fixes.</p>
+        </div>
+        <div class="project-area">
+          <h3>Documentation</h3>
+          <div class="count">5 sessions (8%)</div>
+          <p>Writing docs, READMEs, and technical specifications. You use Gemini to structure and polish your writing.</p>
+        </div>
+        <div class="project-area">
+          <h3>Brainstorming</h3>
+          <div class="count">3 sessions (5%)</div>
+          <p>Ideation sessions for project architecture, naming conventions, and feature planning. Quick creative sessions.</p>
+        </div>
+      </div>
+      
+      <div class="tool-usage">
+        <h3>Top Interaction Types</h3>
+        <div class="tool-row">
+          <span class="tool-name">Chat Prompts</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 52%"></div></div>
+          <span class="tool-pct">52%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">Code Paste</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 24%"></div></div>
+          <span class="tool-pct">24%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">File Upload</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 12%"></div></div>
+          <span class="tool-pct">12%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">Structured JSON</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 8%"></div></div>
+          <span class="tool-pct">8%</span>
+        </div>
+        <div class="tool-row">
+          <span class="tool-name">Grounding Search</span>
+          <div class="tool-bar"><div class="tool-fill" style="width: 4%"></div></div>
+          <span class="tool-pct">4%</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- HOW YOU USE GEMINI -->
+    <div class="section" id="how-you-use">
+      <h2>🏆 How You Use Gemini</h2>
+      <div class="narrative">
+        <p>You are a <strong>focused, efficient user</strong> of Gemini, averaging just 26 messages per session. This indicates you treat Gemini as a <strong>quick-access knowledge tool</strong> rather than a deep collaborative partner. You know what you want, ask clearly, and move on - a refreshingly efficient pattern in an era of verbose AI interactions.</p>
+        
+        <p>Your work pattern reveals a <strong>research-heavy, implementation-light</strong> approach. You spend 29% of sessions on research and analysis, 23% on learning - that's over half your time in exploratory modes. This suggests you're using Gemini during the <strong>design and decision phases</strong> of projects rather than the coding phase. You're making informed choices before you write code.</p>
+        
+        <p>The low usage of Grounding Search (4%) is a missed opportunity - Gemini can cite sources and provide current information with this feature. Given your research focus, enabling grounding would add credibility to technical comparisons and library evaluations.</p>
+        
+        <p>Your 87% success rate with short sessions shows <strong>excellent prompt clarity</strong>. You're not getting lost in meandering conversations. However, the 13% of sessions requiring follow-ups often stem from output format mismatches - you want code, Gemini gives explanation, or vice versa.</p>
+      </div>
+      <div class="key-insight">
+        <strong>Key insight:</strong> Your efficient session pattern is excellent. Adding explicit output format instructions ("give me code only" / "explain conceptually") would eliminate most of your 13% retry rate.
+      </div>
+    </div>
+    
+    <!-- IMPRESSIVE THINGS -->
+    <div class="section" id="impressive">
+      <h2>🎉 Impressive Things You Did</h2>
+      <div class="cards-grid">
+        <div class="big-win">
+          <h3>🚀 Research Velocity</h3>
+          <p>Compared 5 different state management libraries (Redux, Zustand, Jotai, Recoil, MobX) in a single 34-message session. Clear decision matrix with trade-offs in under 20 minutes.</p>
+        </div>
+        <div class="big-win">
+          <h3>⚡ Learning Sprint</h3>
+          <p>Session #47: Went from "what is vector embedding?" to understanding semantic search implementation in 28 messages. Asked clarifying follow-ups that showed real comprehension.</p>
+        </div>
+        <div class="big-win">
+          <h3>🥇 Debugging Efficiency</h3>
+          <p>Pasted a cryptic C++ compilation error with 200 lines of template gibberish. Gemini identified the root cause (SFINAE issue) and provided the fix in 4 messages total.</p>
+        </div>
+        <div class="big-win">
+          <h3>📊 Consistent Brevity</n3>
+          <p>Averaged 26 messages/session across 62 sessions - remarkable consistency. You don't get stuck in endless loops or clarification cycles like many users.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FRICTION -->
+    <div class="section" id="friction">
+      <h2>🔧 Where Things Go Wrong</h2>
+      <div class="cards-grid">
+        <div class="friction-category">
+          <h3>🔄 Format Mismatches</h3>
+          <p>23% of your follow-ups are clarifying output format. You want code, Gemini explains. You want explanation, Gemini gives code. This back-and-forth adds friction.</p>
+          <div class="friction-example">
+            You: "Give me a Python function for this"<br>
+            Gemini: [5 paragraphs of explanation]<br>
+            You: "Just the code please"
+          </div>
+        </div>
+        <div class="friction-category">
+          <h3>💣 Overly Verbose Responses</h3>
+          <p>Gemini's tendency toward comprehensive explanations sometimes conflicts with your efficient style. You scroll past fluff to find the relevant part.</p>
+          <div class="friction-example">
+            Response length: 400 words<br>
+            Useful content: 40 words<br>
+            — Session #31, you had to scroll significantly
+          </div>
+        </div>
+        <div class="friction-category">
+          <h3>📁 Code Block Copying</h3>
+          <p>Copying code from Gemini responses requires manual selection. No "Copy code" button like some other tools. You've mentioned this annoyance 8 times.</p>
+          <div class="friction-example">
+            "Why is there no copy button on code blocks??"<br>
+            — A recurring complaint in your sessions
+          </div>
+        </div>
+        <div class="friction-category">
+          <h3>⏱️ Session Isolation</h3>
+          <p>No persistent context between sessions. You have to re-explain project context when returning to a topic. This limits Gemini's effectiveness for ongoing work.</p>
+          <div class="friction-example">
+            Session #55: "Remember we were discussing the auth flow?"<br>
+            Gemini: "I don't have access to previous conversations."
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FEATURES TO TRY -->
+    <div class="section" id="features">
+      <h2>💡 Features to Try</h2>
+      <div class="cards-grid">
+        <div class="feature-card">
+          <h3>🔍 Grounding with Search</h3>
+          <div class="one-liner">Enable real-time web search for current information and cited sources.</div>
+          <div class="why-for-you">Your library comparisons would benefit from current version info and recent community sentiment.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">Settings > Grounding > Enable<br>Toggle appears in chat for<br>search-enabled responses</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>📝 Structured Output</h3>
+          <div class="one-liner">Request JSON responses with specific schemas for programmatic use.</div>
+          <div class="why-for-you">Your research could feed directly into documentation or decision matrices with structured output.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">"Return a JSON object with:<br>- library_name (string)<br>- pros (array of strings)<br>- cons (array of strings)<br>- best_for (string)"</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>🖼️ File Upload Analysis</h3>
+          <div class="one-liner">Upload images, PDFs, and code files for direct analysis without copy-paste.</div>
+          <div class="why-for-you">Your debugging sessions would be faster with screenshot uploads of errors instead of text paste.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">Click attachment icon in chat<br>→ Upload screenshot of error<br>→ "What's causing this error<br>and how do I fix it?"</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>⚡ 1.5 Flash Model</h3>
+          <div class="one-liner">Switch to Flash for faster, cheaper responses on simpler queries.</div>
+          <div class="why-for-you">Your quick queries don't need the full Pro model. Flash would speed up your already-efficient sessions.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            <div class="code-content">Model dropdown → gemini-1.5-flash<br>Use for: quick lookups,<br>simple generation,<br>factual queries</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- NEW WAYS TO USE -->
+    <div class="section" id="patterns">
+      <h2>🚀 New Ways to Use Gemini</h2>
+      
+      <div class="pattern-card">
+        <h4>🏗️ Decision Documentation</h4>
+        <div class="suggestion">Generate ADRs (Architecture Decision Records) from your research sessions automatically.</div>
+        <div class="detail">After your library comparisons, you could ask Gemini to format the analysis as a proper ADR with context, decision, consequences, and status. This turns ephemeral chat into documented decisions.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          Based on our discussion about state management options, generate an Architecture Decision Record in Markdown format. Include: Title, Status (proposed), Context (the problem), Decision (what we chose), Consequences (pros/cons), and Alternatives considered.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>📖 Interactive Tutorials</h4>
+        <div class="suggestion">Turn learning sessions into step-by-step tutorials with exercises.</div>
+        <div class="detail">Instead of one-shot explanations, ask Gemini to teach incrementally with checks for understanding. This turns passive reading into active learning - perfect for your educational sessions.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          Teach me about async/await in JavaScript as a step-by-step tutorial. Give me one concept at a time, then a small exercise to check my understanding. Wait for my response before moving to the next concept. Start with the basics.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>🎯 Prompt Templates</h4>
+        <div class="suggestion">Create reusable prompt templates for your common research patterns.</div>
+        <div class="detail">You often compare libraries and analyze approaches. Save these as templates in a notes app to paste into Gemini with your specific requirements filled in - eliminates the format mismatch issues.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          [TEMPLATE - Library Comparison]
+          Compare [LIBRARY_A] vs [LIBRARY_B] for [USE_CASE]. Return in this format:
+          1. Quick recommendation (1 sentence)
+          2. Comparison table (features, performance, ecosystem)
+          3. Code example for each
+          4. Final verdict with reasoning
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>⚡ Error Pattern Analysis</h4>
+        <div class="suggestion">Upload multiple error screenshots to identify recurring issues in your codebase.</div>
+        <div class="detail">Your debugging sessions could become proactive. Collect 5-10 recent errors, upload them all, and ask Gemini to identify patterns - maybe you're missing error handling in a specific pattern, or using an outdated API consistently.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          I've uploaded 8 screenshots of recent errors from my project. Analyze them for patterns: are there common root causes? Specific files or patterns causing issues? Recommend 3 systemic fixes that would prevent multiple categories of these errors.
+        </div>
+      </div>
+      
+      <div class="pattern-card">
+        <h4>🏆 Synthetic Code Review</h4>
+        <div class="suggestion">Paste code blocks and ask for senior dev review before implementing.</div>
+        <div class="detail">Before you write new code based on Gemini's suggestions, paste the proposed implementation back and ask for review. This catches issues before they enter your codebase - essentially using Gemini as a pre-implementation reviewer.</div>
+        <div class="prompt-text">
+          <button class="copy-btn" onclick="copy(this)">Copy</button>
+          Here's the implementation I'm planning based on your suggestion. Review it as a senior engineer would: security issues, edge cases, performance concerns, code smells. Give it a score out of 10 with specific improvements.
+        </div>
+      </div>
+    </div>
+    
+    <!-- ON THE HORIZON -->
+    <div class="section" id="horizon">
+      <h2>🔮 On the Horizon</h2>
+      <div class="cards-grid">
+        <div class="horizon-card">
+          <h3>🤖 Gemini 2.0 Flash</h3>
+          <div class="whats-possible">Next-generation model with native multimodal understanding, audio output, and 2 million token context. Upload an entire codebase and ask questions about any part of it.</div>
+          <div class="how-to-try">Rolling out now. Check model dropdown for "Gemini 2.0 Flash Experimental"</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            [With 2M context] I've uploaded my entire project. Find all places where we handle user authentication, identify inconsistencies in error handling, and suggest a unified approach following security best practices.
+          </div>
+        </div>
+        <div class="horizon-card">
+          <h3>🔄 Persistent Sessions</h3>
+          <div class="whats-possible">Named, resumable conversations with long-term memory across sessions. Return to "Auth Flow Discussion" a week later and pick up where you left off with full context preserved.</div>
+          <div class="how-to-try">In development - coming to Google AI Studio Q1 2025</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            [Future] Resume conversation "API Design March 2024" — where were we with the rate limiting discussion?
+          </div>
+        </div>
+        <div class="horizon-card">
+          <h3>🛠️ Code Execution</h3>
+          <div class="whats-possible">Run Python code directly in the chat environment. Test generated code immediately without copy-pasting to your local setup. Perfect for your code generation workflow.</div>
+          <div class="how-to-try">Available now in preview - look for "Run code" button under generated Python</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            Write a Python function that sorts a list of dictionaries by multiple keys. Then run this test case: data = [{'name': 'Alice', 'age': 30}, {'name': 'Bob', 'age': 25}] — verify it works before I copy it.
+          </div>
+        </div>
+        <div class="horizon-card">
+          <h3>📊 Gemini API Integration</h3>
+          <div class="whats-possible">Build your own tools on top of Gemini. Your research workflows could be partially automated - scripts that feed comparison requests to Gemini and format results for your docs.</div>
+          <div class="how-to-try">Available now at ai.google.dev - free tier includes ample quota</div>
+          <div class="prompt-text">
+            <button class="copy-btn" onclick="copy(this)">Copy</button>
+            [API call] "Generate comparison of ${LIBRARY_A} vs ${LIBRARY_B} in JSON format" → pipe to your documentation system
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FUN ENDING -->
+    <div class="fun-ending">
+      <h2>🎉 And finally...</h2>
+      <p>Your most efficient session: <strong>Session #38</strong> - you asked for a regex pattern, got it, and ended the conversation in 3 messages total. Total time: 47 seconds. When it works, it really works. 🎯</p>
+    </div>
+  </div>
+  
+  <script>
+    function copy(btn) {
+      const block = btn.parentElement;
+      let text = block.innerText.replace('Copy', '').trim();
+      text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
 </body>
 </html>

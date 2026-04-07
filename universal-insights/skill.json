@@ -1,0 +1,44 @@
+{
+  "name": "universal-insights",
+  "description": "Cross-agent AI workflow insights",
+  "version": "0.1.0",
+  "commands": {
+    "insights": {
+      "description": "Analyze AI agent sessions across Claude, Cursor, Gemini, and Codex",
+      "arguments": [
+        {
+          "name": "agent",
+          "short": "a",
+          "description": "Filter by agent (claude|cursor|gemini|codex|all)",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "short": "l",
+          "description": "Maximum sessions to analyze",
+          "default": "100"
+        },
+        {
+          "name": "days",
+          "short": "d",
+          "description": "Only analyze sessions from last N days",
+          "required": false
+        },
+        {
+          "name": "no-ai",
+          "short": "n",
+          "description": "Use computed insights instead of AI analysis",
+          "boolean": true
+        },
+        {
+          "name": "output",
+          "short": "o",
+          "description": "Custom output path for HTML report",
+          "required": false
+        }
+      ],
+      "entry": "dist/cli.js",
+      "type": "node"
+    }
+  }
+}

@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Insights</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --accent-primary: #58a6ff;
+      --accent-secondary: #238636;
+      --accent-tertiary: #da3633;
+      --accent-warning: #d29922;
+      --border-color: #30363d;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    /* Header */
+    header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    header h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    header h1::before {
+      content: "◆";
+      color: var(--accent-primary);
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow);
+    }
+    
+    .stat-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .stat-card.sessions { border-left: 3px solid var(--accent-primary); }
+    .stat-card.messages { border-left: 3px solid var(--accent-secondary); }
+    .stat-card.hours { border-left: 3px solid var(--accent-warning); }
+    .stat-card.projects { border-left: 3px solid #a371f7; }
+    .stat-card.errors { border-left: 3px solid var(--accent-tertiary); }
+    .stat-card.commands { border-left: 3px solid #3fb950; }
+    
+    /* Main Grid */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      background: var(--bg-tertiary);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .section-content {
+      padding: 1.5rem;
+    }
+    
+    /* Tool Usage */
+    .tool-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .tool-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .tool-name {
+      width: 120px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .tool-bar-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .tool-bar {
+      height: 20px;
+      background: linear-gradient(90deg, var(--accent-primary), #79c0ff);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+      min-width: 4px;
+    }
+    
+    .tool-count {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      min-width: 30px;
+    }
+    
+    /* Projects */
+    .project-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      background: var(--bg-tertiary);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .project-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: rgba(88, 166, 255, 0.1);
+      transition: width 0.5s ease;
+    }
+    
+    .project-rank {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      width: 40px;
+      z-index: 1;
+    }
+    
+    .project-info {
+      flex: 1;
+      z-index: 1;
+    }
+    
+    .project-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 300px;
+    }
+    
+    .project-stats {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+    
+    /* Sessions Table */
+    .sessions-section {
+      grid-column: 1 / -1;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+    
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    
+    tr:hover td {
+      background: var(--bg-tertiary);
+    }
+    
+    .session-id {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    .message-count {
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .duration {
+      color: var(--text-secondary);
+    }
+    
+    .date {
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    
+    .preview {
+      max-width: 300px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-secondary);
+    }
+    
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stat-card, .section-card {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    .stat-card:nth-child(5) { animation-delay: 0.5s; }
+    .stat-card:nth-child(6) { animation-delay: 0.6s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Claude Code Insights</h1>
+      <div class="subtitle">Generated on 4/6/2026, 11:17:32 PM | Data range: 3/3/2026 - 4/6/2026</div>
+    </header>
+    
+    <div class="stats-grid">
+      <div class="stat-card sessions">
+        <div class="stat-icon">📁</div>
+        <div class="stat-value">200</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+      
+      <div class="stat-card messages">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value">27,552</div>
+        <div class="stat-label">Total Messages</div>
+      </div>
+      
+      <div class="stat-card hours">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-value">1659.9</div>
+        <div class="stat-label">Total Hours</div>
+      </div>
+      
+      <div class="stat-card projects">
+        <div class="stat-icon">📂</div>
+        <div class="stat-value">8</div>
+        <div class="stat-label">Projects</div>
+      </div>
+      
+      <div class="stat-card commands">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value">36</div>
+        <div class="stat-label">Commands</div>
+      </div>
+      
+      <div class="stat-card errors">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-value">5,501</div>
+        <div class="stat-label">Errors</div>
+      </div>
+    </div>
+    
+    <div class="main-grid">
+      <div class="section-card">
+        <div class="section-header">
+          <span>🔧</span> Top Tool Usage
+        </div>
+        <div class="section-content">
+          
+            <div class="tool-list">
+              
+    <div class="tool-item">
+      <div class="tool-name">Bash</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 100.0%"></div>
+        <span class="tool-count">3492</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">Read</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 43.3%"></div>
+        <span class="tool-count">1513</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">Edit</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 14.6%"></div>
+        <span class="tool-count">511</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">Grep</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 9.2%"></div>
+        <span class="tool-count">321</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">ToolSearch</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 5.2%"></div>
+        <span class="tool-count">183</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">Write</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 5.0%"></div>
+        <span class="tool-count">176</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">WebSearch</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 4.1%"></div>
+        <span class="tool-count">144</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">Agent</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 4.1%"></div>
+        <span class="tool-count">143</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">WebFetch</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 3.8%"></div>
+        <span class="tool-count">133</span>
+      </div>
+    </div>
+  
+    <div class="tool-item">
+      <div class="tool-name">mcp__claude-in-chrome__computer</div>
+      <div class="tool-bar-container">
+        <div class="tool-bar" style="width: 3.4%"></div>
+        <span class="tool-count">117</span>
+      </div>
+    </div>
+  
+            </div>
+          
+        </div>
+      </div>
+      
+      <div class="section-card">
+        <div class="section-header">
+          <span>📂</span> Top Projects
+        </div>
+        <div class="section-content">
+          
+    <div class="project-card" style="--rank: 0">
+      <div class="project-rank">#1</div>
+      <div class="project-info">
+        <div class="project-name">zaydk</div>
+        <div class="project-stats">
+          <span>121 sessions</span>
+          <span>15,564 messages</span>
+          <span>Last: Apr 6, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 100.0%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 1">
+      <div class="project-rank">#2</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-Desktop-hydra</div>
+        <div class="project-stats">
+          <span>39 sessions</span>
+          <span>4,797 messages</span>
+          <span>Last: Apr 6, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 30.8%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 2">
+      <div class="project-rank">#3</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-Desktop-websites-zayd-wtf</div>
+        <div class="project-stats">
+          <span>13 sessions</span>
+          <span>2,976 messages</span>
+          <span>Last: Apr 6, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 19.1%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 3">
+      <div class="project-rank">#4</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-Desktop-rosie</div>
+        <div class="project-stats">
+          <span>10 sessions</span>
+          <span>2,439 messages</span>
+          <span>Last: Mar 21, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 15.7%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 4">
+      <div class="project-rank">#5</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-Desktop-Hooke-Preview</div>
+        <div class="project-stats">
+          <span>13 sessions</span>
+          <span>1,688 messages</span>
+          <span>Last: Mar 30, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 10.8%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 5">
+      <div class="project-rank">#6</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-zayd-wtf</div>
+        <div class="project-stats">
+          <span>2 sessions</span>
+          <span>43 messages</span>
+          <span>Last: Mar 30, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 0.3%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 6">
+      <div class="project-rank">#7</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-Desktop-websites-zayd wtf</div>
+        <div class="project-stats">
+          <span>1 sessions</span>
+          <span>41 messages</span>
+          <span>Last: Apr 3, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 0.3%"></div>
+    </div>
+  
+    <div class="project-card" style="--rank: 7">
+      <div class="project-rank">#8</div>
+      <div class="project-info">
+        <div class="project-name">zaydk-Desktop-app dev-Tasbih app</div>
+        <div class="project-stats">
+          <span>1 sessions</span>
+          <span>4 messages</span>
+          <span>Last: Mar 25, 2026</span>
+        </div>
+      </div>
+      <div class="project-bar" style="width: 0.0%"></div>
+    </div>
+  
+        </div>
+      </div>
+    </div>
+    
+    <div class="section-card sessions-section">
+      <div class="section-header">
+        <span>📋</span> Recent Sessions
+      </div>
+      <div class="section-content">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Session ID</th>
+                <th>Project</th>
+                <th>Messages</th>
+                <th>Duration</th>
+                <th>Created</th>
+                <th>First Prompt</th>
+              </tr>
+            </thead>
+            <tbody>
+              
+    <tr>
+      <td class="session-id">agent-as...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">217</td>
+      <td class="duration">35m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Conversation compacted">Conversation compacted</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">3c8d2f45...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">741</td>
+      <td class="duration">1h 54m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="&lt;local-command-caveat&gt;Caveat: The messages below were generated by the user while running local comm">&lt;local-command-caveat&gt;Caveat: The messages below w...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-ac...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">456</td>
+      <td class="duration">1h 18m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="&lt;local-command-caveat&gt;Caveat: The messages below were generated by the user while running local comm">&lt;local-command-caveat&gt;Caveat: The messages below w...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-as...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">460</td>
+      <td class="duration">1h 18m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="&lt;local-command-caveat&gt;Caveat: The messages below were generated by the user while running local comm">&lt;local-command-caveat&gt;Caveat: The messages below w...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-ac...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">457</td>
+      <td class="duration">1h 18m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="&lt;local-command-caveat&gt;Caveat: The messages below were generated by the user while running local comm">&lt;local-command-caveat&gt;Caveat: The messages below w...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">839a935a...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">102</td>
+      <td class="duration">4h 37m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="check /last30days worjks entirely. then check for some goo examples orbest exampls of just ac laude.">check /last30days worjks entirely. then check for ...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-ad...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">61</td>
+      <td class="duration">1m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Explore the codebase at /Users/zaydk/Desktop/hydra. I need to understand two things:
+
+1. SESSION REF">Explore the codebase at /Users/zaydk/Desktop/hydra...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-af...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">41</td>
+      <td class="duration">1m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Explore the codebase at /Users/zaydk/Desktop/hydra. An agent called &quot;Hermes&quot; made frontend changes. ">Explore the codebase at /Users/zaydk/Desktop/hydra...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">3c3ed936...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">46</td>
+      <td class="duration">4m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="can you find me the exact paths that &#039;
+1. **Cursor:** Want me to explore `~/.cursor/chats/` and `~/.">can you find me the exact paths that &#039;
+1. **Cursor...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">badf1624...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">11</td>
+      <td class="duration">0m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="&lt;local-command-caveat&gt;Caveat: The messages below were generated by the user while running local comm">&lt;local-command-caveat&gt;Caveat: The messages below w...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">6ce5e5c3...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">646</td>
+      <td class="duration">2h 39m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="You are a systems analyst working on the Hydra project at ~/Desktop/hydra.
+
+FIRST - Read this archiv">You are a systems analyst working on the Hydra pro...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-a1...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">79</td>
+      <td class="duration">1h 14m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Explore the Hydra frontend codebase at /Users/zaydk/Desktop/hydra/client/src. I need a thorough revi">Explore the Hydra frontend codebase at /Users/zayd...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-a0...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">11</td>
+      <td class="duration">1h 4m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Research OpenRouter&#039;s API capabilities, specifically around management keys and account management. ">Research OpenRouter&#039;s API capabilities, specifical...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-a5...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">20</td>
+      <td class="duration">1h 4m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Research the Clerk Frontend API (FAPI) session management system, specifically as used by OpenRouter">Research the Clerk Frontend API (FAPI) session man...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-ac...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">208</td>
+      <td class="duration">54m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="You are a systems analyst working on the Hydra project at ~/Desktop/hydra.
+
+FIRST - Read this archiv">You are a systems analyst working on the Hydra pro...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-a8...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">52</td>
+      <td class="duration">0m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Read these files and answer specific questions:
+
+1. `/Users/zaydk/Desktop/hydra/request-based-provis">Read these files and answer specific questions:
+
+1...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-a4...</td>
+      <td class="project-name">zaydk</td>
+      <td class="message-count">34</td>
+      <td class="duration">0m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Read these files and answer specific questions:
+
+1. `/Users/zaydk/Desktop/hydra/server/services/cler">Read these files and answer specific questions:
+
+1...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">agent-a0...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">41</td>
+      <td class="duration">0m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Read the following files and report back their full contents (or key sections if very long):
+
+1. /Us">Read the following files and report back their ful...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">5cf4a984...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">9</td>
+      <td class="duration">0m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="Read ~/Desktop/hydra/docs/PROJECT_STATUS_ARCHIVE_2026-04-03.md and analyze the OTP session issues. T">Read ~/Desktop/hydra/docs/PROJECT_STATUS_ARCHIVE_2...</td>
+    </tr>
+  
+    <tr>
+      <td class="session-id">03ddd1e0...</td>
+      <td class="project-name">zaydk-Desktop-hydra</td>
+      <td class="message-count">37</td>
+      <td class="duration">3m</td>
+      <td class="date">Apr 6, 2026</td>
+      <td class="preview" title="You are a systems analyst working on the Hydra project.
+
+FIRST - Read this file to understand the pr">You are a systems analyst working on the Hydra pro...</td>
+    </tr>
+  
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      Generated by Claude Code Insights Reporter • 200 sessions analyzed
+    </footer>
+  </div>
+</body>
+</html>

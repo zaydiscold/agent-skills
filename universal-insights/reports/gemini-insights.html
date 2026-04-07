@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini CLI Insights Report</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header {
+      background: linear-gradient(135deg, #1f6feb 0%, #388bfd 100%);
+      padding: 40px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: 2.5em;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    header p {
+      color: rgba(255,255,255,0.8);
+      font-size: 1.1em;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    .badge.active { background: #238636; color: #fff; }
+    .badge.empty { background: #30363d; color: #8b949e; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: #58a6ff;
+    }
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: 700;
+      color: #58a6ff;
+      margin-bottom: 8px;
+    }
+    .stat-label {
+      color: #8b949e;
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .section {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section h2 {
+      color: #f0f6fc;
+      font-size: 1.4em;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #30363d;
+    }
+    .directory-structure {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.9em;
+      background: #0d1117;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .directory-structure .dir { color: #58a6ff; }
+    .directory-structure .file { color: #a371f7; }
+    .sessions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .session-card {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 20px;
+      transition: border-color 0.2s;
+    }
+    .session-card:hover {
+      border-color: #1f6feb;
+    }
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .session-header h3 {
+      font-family: monospace;
+      color: #f0f6fc;
+      font-size: 1.1em;
+    }
+    .session-meta {
+      font-size: 0.85em;
+      color: #8b949e;
+      margin-bottom: 12px;
+    }
+    .session-meta div { margin-bottom: 4px; }
+    .message-breakdown {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .msg-tag {
+      font-size: 0.75em;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .msg-tag.user { background: #1f6feb; color: #fff; }
+    .msg-tag.model { background: #238636; color: #fff; }
+    .msg-tag.error { background: #da3633; color: #fff; }
+    .file-path {
+      font-family: monospace;
+      font-size: 0.75em;
+      color: #6e7681;
+      word-break: break-all;
+    }
+    .no-data {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8b949e;
+    }
+    .no-data h3 {
+      font-size: 1.5em;
+      margin-bottom: 16px;
+      color: #f0f6fc;
+    }
+    .adapter-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+    .adapter-status.used {
+      background: #238636;
+      color: #fff;
+    }
+    .adapter-status.not-used {
+      background: #9e8c6a;
+      color: #000;
+    }
+    .discovery-note {
+      background: #0d1117;
+      border-left: 4px solid #1f6feb;
+      padding: 16px;
+      margin: 20px 0;
+      border-radius: 0 8px 8px 0;
+    }
+    .discovery-note h4 {
+      color: #58a6ff;
+      margin-bottom: 8px;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #6e7681;
+      font-size: 0.85em;
+      border-top: 1px solid #30363d;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔮 Gemini CLI Insights</h1>
+      <p>Session data analysis report generated on 4/6/2026, 11:20:59 PM</p>
+      <div style="margin-top: 16px;">
+        <span class="adapter-status not-used">
+          ⚠ Built-in Parser Used
+        </span>
+      </div>
+    </header>
+
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">62</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1572</div>
+        <div class="stat-label">Total Messages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">25.4</div>
+        <div class="stat-label">Avg Messages/Session</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">9</div>
+        <div class="stat-label">Projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">9.93</div>
+        <div class="stat-label">Data Size (MB)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">85</div>
+        <div class="stat-label">Error Messages</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 Data Discovery Summary</h2>
+      <div class="discovery-note">
+        <h4>Data Sources Found:</h4>
+        <p><strong>~/.gemini/tmp/*/chats/session-*.json</strong> - Contains 62 chat session files with message history</p>
+        <p><strong>~/.gemini/tmp/*/logs.json</strong> - Contains 10 log files with command history</p>
+        <p><strong>~/.gemini/history/</strong> - Contains 17 project directories (git-based session tracking)</p>
+        <p><strong>~/.gemini/settings.json</strong> - User preferences and MCP server configuration</p>
+        <p><strong>~/.gemini/projects.json</strong> - Project path mappings</p>
+      </div>
+      
+      <h3 style="margin-top: 20px; color: #f0f6fc;">Session Time Range</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 12px;">
+        <div style="background: #0d1117; padding: 16px; border-radius: 8px;">
+          <div style="color: #8b949e; font-size: 0.85em;">Oldest Session</div>
+          <div style="color: #f0f6fc; font-size: 1.2em; margin-top: 4px;">
+            11/20/2025, 5:52:29 PM
+          </div>
+        </div>
+        <div style="background: #0d1117; padding: 16px; border-radius: 8px;">
+          <div style="color: #8b949e; font-size: 0.85em;">Newest Session</div>
+          <div style="color: #f0f6fc; font-size: 1.2em; margin-top: 4px;">
+            3/9/2026, 1:06:46 PM
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 20px; color: #f0f6fc;">Message Breakdown</h3>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px;">
+        <div style="background: #0d1117; padding: 16px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 1.8em; color: #1f6feb;">340</div>
+          <div style="color: #8b949e; font-size: 0.85em;">User Messages</div>
+        </div>
+        <div style="background: #0d1117; padding: 16px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 1.8em; color: #238636;">0</div>
+          <div style="color: #8b949e; font-size: 0.85em;">Model Responses</div>
+        </div>
+        <div style="background: #0d1117; padding: 16px; border-radius: 8px; text-align: center;">
+          <div style="font-size: 1.8em; color: #da3633;">85</div>
+          <div style="color: #8b949e; font-size: 0.85em;">Errors</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📁 Directory Structure</h2>
+      <div class="directory-structure">
+<span class="dir">~/.gemini/</span><br>
+├── <span class="dir">history/</span> - 17 project directories<br>
+│   └── (git repositories for project context)<br>
+├── <span class="dir">tmp/</span> - 25 temp directories<br>
+│   └── <span class="dir">[project-hash]/</span><br>
+│       ├── <span class="dir">chats/</span> - Session JSON files<br>
+│       │   └── <span class="file">session-YYYY-MM-DD...json</span><br>
+│       └── <span class="file">logs.json</span> - Command history<br>
+├── <span class="file">settings.json</span> - User preferences<br>
+├── <span class="file">projects.json</span> - Project mappings<br>
+├── <span class="file">state.json</span> - Application state<br>
+└── <span class="file">oauth_creds.json</span> - Auth tokens
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>💬 Session Breakdown (62 sessions)</h2>
+      <div class="sessions-grid">
+        
+        <div class="session-card">
+          <div class="session-header">
+            <h3>8a0b97fa</h3>
+            <span class="badge active">17 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 3/9/2026, 1:06:46 PM</div>
+            <div><strong>Duration:</strong> 1766679s</div>
+            <div><strong>Size:</strong> 72.9 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-03-09T20-05-8a0b97fa.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>bf53fff7</h3>
+            <span class="badge active">6 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/28/2026, 10:30:29 AM</div>
+            <div><strong>Duration:</strong> 123s</div>
+            <div><strong>Size:</strong> 16.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-28T18-30-bf53fff7.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>8dc96630</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/23/2026, 5:30:05 PM</div>
+            <div><strong>Duration:</strong> 310s</div>
+            <div><strong>Size:</strong> 4.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-24T01-29-8dc96630.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>f3ba8099</h3>
+            <span class="badge active">4 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/23/2026, 3:21:48 PM</div>
+            <div><strong>Duration:</strong> 7688s</div>
+            <div><strong>Size:</strong> 3.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-23T23-20-f3ba8099.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d6b15b89</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/23/2026, 3:20:41 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 0.5 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-23T23-20-d6b15b89.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>124cedc6</h3>
+            <span class="badge active">4 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 2/23/2026, 12:44:50 PM</div>
+            <div><strong>Duration:</strong> 19s</div>
+            <div><strong>Size:</strong> 1.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">3 errors</span>
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-23T20-44-124cedc6.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>124cedc6</h3>
+            <span class="badge active">4 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/23/2026, 12:44:50 PM</div>
+            <div><strong>Duration:</strong> 19s</div>
+            <div><strong>Size:</strong> 1.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">3 errors</span>
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-23T20-44-124cedc6.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>2c31b80d</h3>
+            <span class="badge active">3 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 2/19/2026, 1:21:10 PM</div>
+            <div><strong>Duration:</strong> 20s</div>
+            <div><strong>Size:</strong> 0.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">1 errors</span>
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T21-21-2c31b80d.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>2c31b80d</h3>
+            <span class="badge active">3 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/19/2026, 1:21:10 PM</div>
+            <div><strong>Duration:</strong> 20s</div>
+            <div><strong>Size:</strong> 0.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">1 errors</span>
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-19T21-21-2c31b80d.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>3283d94b</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 2/18/2026, 9:10:33 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 0.6 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T05-10-3283d94b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>3283d94b</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/18/2026, 9:10:33 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 0.6 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-19T05-10-3283d94b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>3283d94b</h3>
+            <span class="badge active">15 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 2/18/2026, 9:00:13 PM</div>
+            <div><strong>Duration:</strong> 764s</div>
+            <div><strong>Size:</strong> 34.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T05-00-3283d94b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>3283d94b</h3>
+            <span class="badge active">15 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/18/2026, 9:00:13 PM</div>
+            <div><strong>Duration:</strong> 764s</div>
+            <div><strong>Size:</strong> 34.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-19T05-00-3283d94b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>2a91bec7</h3>
+            <span class="badge active">39 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 2/18/2026, 8:43:29 PM</div>
+            <div><strong>Duration:</strong> 1001s</div>
+            <div><strong>Size:</strong> 8.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">32 errors</span>
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-02-19T04-43-2a91bec7.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>2a91bec7</h3>
+            <span class="badge active">39 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 2/18/2026, 8:43:29 PM</div>
+            <div><strong>Duration:</strong> 1001s</div>
+            <div><strong>Size:</strong> 8.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">32 errors</span>
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-02-19T04-43-2a91bec7.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d1fb5c0f</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:13:59 AM</div>
+            <div><strong>Duration:</strong> 34s</div>
+            <div><strong>Size:</strong> 1.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-13-d1fb5c0f.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d1fb5c0f</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:09:18 AM</div>
+            <div><strong>Duration:</strong> 41s</div>
+            <div><strong>Size:</strong> 1.4 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-09-d1fb5c0f.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>9e9d5fe7</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:08:53 AM</div>
+            <div><strong>Duration:</strong> 37s</div>
+            <div><strong>Size:</strong> 8.5 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-08-9e9d5fe7.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>f8d71d70</h3>
+            <span class="badge active">9 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:08:03 AM</div>
+            <div><strong>Duration:</strong> 76s</div>
+            <div><strong>Size:</strong> 42.9 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-08-f8d71d70.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d1fb5c0f</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:06:59 AM</div>
+            <div><strong>Duration:</strong> 28s</div>
+            <div><strong>Size:</strong> 1.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-06-d1fb5c0f.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>4f4de258</h3>
+            <span class="badge active">6 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:06:19 AM</div>
+            <div><strong>Duration:</strong> 42s</div>
+            <div><strong>Size:</strong> 27.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-06-4f4de258.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d1fb5c0f</h3>
+            <span class="badge active">45 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 3:05:47 AM</div>
+            <div><strong>Duration:</strong> 537s</div>
+            <div><strong>Size:</strong> 221.0 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T11-05-d1fb5c0f.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>29b34a88</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 06b81c8663f3d063...</div>
+            <div><strong>Started:</strong> 1/30/2026, 2:57:21 AM</div>
+            <div><strong>Duration:</strong> 15s</div>
+            <div><strong>Size:</strong> 4.6 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">06b81c8663f3d0637ebd608143af321010bc011e2cb337771f42807200bed785/chats/session-2026-01-30T10-52-29b34a88.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>af2ef76b</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/27/2026, 6:12:31 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 0.5 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-28T02-12-af2ef76b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>af2ef76b</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/27/2026, 6:12:31 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 0.5 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-28T02-12-af2ef76b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>07398721</h3>
+            <span class="badge active">6 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> d56b11d3e58e9970...</div>
+            <div><strong>Started:</strong> 1/19/2026, 12:56:09 PM</div>
+            <div><strong>Duration:</strong> 170606s</div>
+            <div><strong>Size:</strong> 10.6 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">1 errors</span>
+          </div>
+          <div class="file-path">d56b11d3e58e99707e61a7bfb61827f43bb72caaf9d858c5ceb0df7df6bec7d4/chats/session-2026-01-19T20-55-07398721.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>6fddcf99</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/19/2026, 12:54:43 PM</div>
+            <div><strong>Duration:</strong> 5s</div>
+            <div><strong>Size:</strong> 1.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-19T19-43-6fddcf99.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>6fddcf99</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/19/2026, 12:54:43 PM</div>
+            <div><strong>Duration:</strong> 5s</div>
+            <div><strong>Size:</strong> 1.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-19T19-43-6fddcf99.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>a910ae38</h3>
+            <span class="badge active">18 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/19/2026, 9:53:10 AM</div>
+            <div><strong>Duration:</strong> 6638s</div>
+            <div><strong>Size:</strong> 48.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-19T17-52-a910ae38.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>a910ae38</h3>
+            <span class="badge active">18 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/19/2026, 9:53:10 AM</div>
+            <div><strong>Duration:</strong> 6638s</div>
+            <div><strong>Size:</strong> 48.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-19T17-52-a910ae38.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>cb0efaaa</h3>
+            <span class="badge active">4 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/19/2026, 8:28:06 AM</div>
+            <div><strong>Duration:</strong> 2516s</div>
+            <div><strong>Size:</strong> 1.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">1 errors</span>
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-16T18-17-cb0efaaa.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>cb0efaaa</h3>
+            <span class="badge active">4 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/19/2026, 8:28:06 AM</div>
+            <div><strong>Duration:</strong> 2516s</div>
+            <div><strong>Size:</strong> 1.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">1 errors</span>
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-16T18-17-cb0efaaa.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>9a5ee743</h3>
+            <span class="badge active">6 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/14/2026, 11:18:13 AM</div>
+            <div><strong>Duration:</strong> 18s</div>
+            <div><strong>Size:</strong> 13.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-14T19-17-9a5ee743.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>9a5ee743</h3>
+            <span class="badge active">6 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/14/2026, 11:18:13 AM</div>
+            <div><strong>Duration:</strong> 18s</div>
+            <div><strong>Size:</strong> 13.1 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-14T19-17-9a5ee743.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>ee91fe83</h3>
+            <span class="badge active">57 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/14/2026, 1:50:59 AM</div>
+            <div><strong>Duration:</strong> 34007s</div>
+            <div><strong>Size:</strong> 688.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-14T09-50-ee91fe83.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>ee91fe83</h3>
+            <span class="badge active">57 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/14/2026, 1:50:59 AM</div>
+            <div><strong>Duration:</strong> 34007s</div>
+            <div><strong>Size:</strong> 688.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-14T09-50-ee91fe83.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>ec64787b</h3>
+            <span class="badge active">121 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:44:27 PM</div>
+            <div><strong>Duration:</strong> 122691s</div>
+            <div><strong>Size:</strong> 1036.2 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">35 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-09T21-42-ec64787b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>ec64787b</h3>
+            <span class="badge active">121 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:44:27 PM</div>
+            <div><strong>Duration:</strong> 122691s</div>
+            <div><strong>Size:</strong> 1036.2 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">35 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-09T21-42-ec64787b.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>2c0aa3ff</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> f5ef1903a904780f...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:43:07 PM</div>
+            <div><strong>Duration:</strong> 4s</div>
+            <div><strong>Size:</strong> 3.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">f5ef1903a904780f32084178699a9fff9d486887f78d5e73756801ab0f383f5e/chats/session-2026-01-09T21-39-2c0aa3ff.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>2c0aa3ff</h3>
+            <span class="badge active">2 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zaydk...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:43:07 PM</div>
+            <div><strong>Duration:</strong> 4s</div>
+            <div><strong>Size:</strong> 3.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">0 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zaydk/chats/session-2026-01-09T21-39-2c0aa3ff.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>7154ce80</h3>
+            <span class="badge active">23 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:31:39 PM</div>
+            <div><strong>Duration:</strong> 649s</div>
+            <div><strong>Size:</strong> 81.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">8 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">5 errors</span>
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-09T21-30-7154ce80.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>7154ce80</h3>
+            <span class="badge active">23 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:31:39 PM</div>
+            <div><strong>Duration:</strong> 649s</div>
+            <div><strong>Size:</strong> 81.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">8 user</span>
+            <span class="msg-tag model">0 model</span>
+            <span class="msg-tag error">5 errors</span>
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-09T21-30-7154ce80.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>5b605bb2</h3>
+            <span class="badge active">14 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:08:46 AM</div>
+            <div><strong>Duration:</strong> 44522s</div>
+            <div><strong>Size:</strong> 29.9 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-09T09-05-5b605bb2.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>5b605bb2</h3>
+            <span class="badge active">14 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/9/2026, 1:08:46 AM</div>
+            <div><strong>Duration:</strong> 44522s</div>
+            <div><strong>Size:</strong> 29.9 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">4 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-09T09-05-5b605bb2.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d18d814f</h3>
+            <span class="badge active">80 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/6/2026, 11:55:14 AM</div>
+            <div><strong>Duration:</strong> 56551s</div>
+            <div><strong>Size:</strong> 326.4 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">15 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-06T19-54-d18d814f.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>d18d814f</h3>
+            <span class="badge active">80 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/6/2026, 11:55:14 AM</div>
+            <div><strong>Duration:</strong> 56551s</div>
+            <div><strong>Size:</strong> 326.4 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">15 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-06T19-54-d18d814f.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>aae5d740</h3>
+            <span class="badge active">7 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/5/2026, 5:33:59 PM</div>
+            <div><strong>Duration:</strong> 20s</div>
+            <div><strong>Size:</strong> 31.9 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-06T01-33-aae5d740.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>aae5d740</h3>
+            <span class="badge active">7 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/5/2026, 5:33:59 PM</div>
+            <div><strong>Duration:</strong> 20s</div>
+            <div><strong>Size:</strong> 31.9 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-06T01-33-aae5d740.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>4d997d2c</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/5/2026, 5:33:15 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 10.2 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-06T01-32-4d997d2c.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>4d997d2c</h3>
+            <span class="badge active">1 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/5/2026, 5:33:15 PM</div>
+            <div><strong>Duration:</strong> 0s</div>
+            <div><strong>Size:</strong> 10.2 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">1 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-06T01-32-4d997d2c.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>ff343c05</h3>
+            <span class="badge active">55 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/5/2026, 5:13:14 PM</div>
+            <div><strong>Duration:</strong> 1115s</div>
+            <div><strong>Size:</strong> 273.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">7 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T20-30-ff343c05.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>ff343c05</h3>
+            <span class="badge active">55 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/5/2026, 5:13:14 PM</div>
+            <div><strong>Duration:</strong> 1115s</div>
+            <div><strong>Size:</strong> 273.8 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">7 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-05T20-30-ff343c05.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>f3001bf1</h3>
+            <span class="badge active">71 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/5/2026, 10:35:13 AM</div>
+            <div><strong>Duration:</strong> 6946s</div>
+            <div><strong>Size:</strong> 185.2 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">18 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T16-06-f3001bf1.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>f3001bf1</h3>
+            <span class="badge active">71 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/5/2026, 10:35:13 AM</div>
+            <div><strong>Duration:</strong> 6946s</div>
+            <div><strong>Size:</strong> 185.2 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">18 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-05T16-06-f3001bf1.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>37b5a3ec</h3>
+            <span class="badge active">130 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/5/2026, 3:14:02 AM</div>
+            <div><strong>Duration:</strong> 17528s</div>
+            <div><strong>Size:</strong> 1654.4 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">35 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T11-13-37b5a3ec.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>37b5a3ec</h3>
+            <span class="badge active">130 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/5/2026, 3:14:02 AM</div>
+            <div><strong>Duration:</strong> 17528s</div>
+            <div><strong>Size:</strong> 1654.4 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">35 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-05T11-13-37b5a3ec.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>8f9f5157</h3>
+            <span class="badge active">48 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> ad46bc5976963547...</div>
+            <div><strong>Started:</strong> 1/5/2026, 2:33:03 AM</div>
+            <div><strong>Duration:</strong> 2433s</div>
+            <div><strong>Size:</strong> 156.0 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">12 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">ad46bc59769635479de4774dd71a801013099e65d65bc7a76d0947fe5c2e36fc/chats/session-2026-01-05T10-32-8f9f5157.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>8f9f5157</h3>
+            <span class="badge active">48 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> zayd-wtf...</div>
+            <div><strong>Started:</strong> 1/5/2026, 2:33:03 AM</div>
+            <div><strong>Duration:</strong> 2433s</div>
+            <div><strong>Size:</strong> 156.0 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">12 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">zayd-wtf/chats/session-2026-01-05T10-32-8f9f5157.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>966e86da</h3>
+            <span class="badge active">6 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> e05eb9307a12f877...</div>
+            <div><strong>Started:</strong> 1/5/2026, 2:25:19 AM</div>
+            <div><strong>Duration:</strong> 39s</div>
+            <div><strong>Size:</strong> 152.3 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">e05eb9307a12f877ee1f8b3c4f5e439916fdf341a7282e209abf6ef50df0debd/chats/session-2026-01-05T10-24-966e86da.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>f4c50e30</h3>
+            <span class="badge active">13 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 234be53243bba570...</div>
+            <div><strong>Started:</strong> 11/21/2025, 1:17:04 PM</div>
+            <div><strong>Duration:</strong> 480s</div>
+            <div><strong>Size:</strong> 42.7 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">3 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">234be53243bba570e188a607498e38d12e1f3471cf77233c52337dbef934132a/chats/session-2025-11-21T21-06-f4c50e30.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>414d43fc</h3>
+            <span class="badge active">13 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 3f10517a4d3af7cf...</div>
+            <div><strong>Started:</strong> 11/20/2025, 8:54:22 PM</div>
+            <div><strong>Duration:</strong> 91s</div>
+            <div><strong>Size:</strong> 22.4 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">2 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">3f10517a4d3af7cfab2168250071e80351df4489a9991c00ec21e2dbce49007c/chats/session-2025-11-21T04-54-414d43fc.json</div>
+        </div>
+      
+        <div class="session-card">
+          <div class="session-header">
+            <h3>414d43fc</h3>
+            <span class="badge active">30 messages</span>
+          </div>
+          <div class="session-meta">
+            <div><strong>Project:</strong> 3f10517a4d3af7cf...</div>
+            <div><strong>Started:</strong> 11/20/2025, 5:52:29 PM</div>
+            <div><strong>Duration:</strong> 65987s</div>
+            <div><strong>Size:</strong> 358.6 KB</div>
+          </div>
+          <div class="message-breakdown">
+            <span class="msg-tag user">5 user</span>
+            <span class="msg-tag model">0 model</span>
+            
+          </div>
+          <div class="file-path">3f10517a4d3af7cfab2168250071e80351df4489a9991c00ec21e2dbce49007c/chats/session-2025-11-21T01-47-414d43fc.json</div>
+        </div>
+      
+      </div>
+    </div>
+    
+
+    <footer>
+      <p>Generated by Gemini CLI Insights Report Generator</p>
+      <p style="margin-top: 4px;">2026-04-07T06:20:59.393Z</p>
+    </footer>
+  </div>
+</body>
+</html>

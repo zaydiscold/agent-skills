@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codex Insights Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --text-primary: #e6edf3;
+      --text-secondary: #7d8590;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-purple: #a371f7;
+      --accent-orange: #d29922;
+      --accent-red: #f85149;
+      --border-color: #30363d;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+    
+    .header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px 32px;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .header .subtitle {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-blue);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+    
+    .stat-value.green { color: var(--accent-green); }
+    .stat-value.purple { color: var(--accent-purple); }
+    .stat-value.orange { color: var(--accent-orange); }
+    .stat-value.red { color: var(--accent-red); }
+    
+    .section {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    
+    .section-header {
+      background: var(--bg-tertiary);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .section-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .section-body {
+      padding: 20px;
+    }
+    
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .chart-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    
+    .chart-container h3 {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .session-item {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+    
+    .session-info h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .session-info .session-meta {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    
+    .session-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+    }
+    
+    .session-stat {
+      text-align: center;
+    }
+    
+    .session-stat .value {
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+    
+    .session-stat .label {
+      color: var(--text-secondary);
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    
+    .badge-blue { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); }
+    .badge-green { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); }
+    .badge-purple { background: rgba(163, 113, 247, 0.2); color: var(--accent-purple); }
+    .badge-orange { background: rgba(210, 153, 34, 0.2); color: var(--accent-orange); }
+    
+    .tool-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .tool-tag {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 12px;
+    }
+    
+    .tool-tag .count {
+      color: var(--accent-blue);
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    
+    .errors-section {
+      background: rgba(248, 81, 73, 0.1);
+      border: 1px solid var(--accent-red);
+    }
+    
+    .error-item {
+      color: var(--accent-red);
+      font-size: 13px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .error-item:last-child {
+      border-bottom: none;
+    }
+    
+    .insights-list {
+      list-style: none;
+    }
+    
+    .insights-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+    }
+    
+    .insights-list li:before {
+      content: "•";
+      color: var(--accent-blue);
+      margin-right: 8px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    
+    .empty-state h3 {
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 16px; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .session-item { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🤖 Codex Insights Report</h1>
+    <div class="subtitle">Generated on 4/6/2026, 11:17:55 PM • Analyzing data from ~/.codex/</div>
+  </div>
+  
+  <div class="container">
+    <!-- Summary Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Sessions</div>
+        <div class="stat-value">567</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Messages</div>
+        <div class="stat-value green">32,456</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Tool Calls</div>
+        <div class="stat-value purple">44,782</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Tokens</div>
+        <div class="stat-value orange">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Data Size</div>
+        <div class="stat-value">1.57 GB</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Session Time</div>
+        <div class="stat-value">6h 31m</div>
+      </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-container">
+        <h3>📊 Activity Over Time</h3>
+        <canvas id="activityChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>🔧 Top Tools Used</h3>
+        <canvas id="toolsChart"></canvas>
+      </div>
+    </div>
+    
+    <!-- Content Type Distribution -->
+    <div class="section">
+      <div class="section-header">
+        <h2>📈 Content Type Distribution</h2>
+      </div>
+      <div class="section-body">
+        <div class="stats-grid" style="margin-bottom: 0;">
+          <div class="stat-card">
+            <div class="stat-label">Text Messages</div>
+            <div class="stat-value">20,878</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Code Blocks</div>
+            <div class="stat-value green">6,302</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Commands</div>
+            <div class="stat-value purple">1,362</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Errors</div>
+            <div class="stat-value" style="color: var(--accent-red)">3,914</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tool Usage -->
+    <div class="section">
+      <div class="section-header">
+        <h2>🛠️ Tool Usage Breakdown</h2>
+        <span class="badge badge-blue">49 unique tools</span>
+      </div>
+      <div class="section-body">
+        <div class="tool-list">
+          
+            <div class="tool-tag">exec_command<span class="count">17474</span></div>
+          
+            <div class="tool-tag">shell<span class="count">16146</span></div>
+          
+            <div class="tool-tag">shell_command<span class="count">3702</span></div>
+          
+            <div class="tool-tag">write_stdin<span class="count">1464</span></div>
+          
+            <div class="tool-tag">spawn_agent<span class="count">1022</span></div>
+          
+            <div class="tool-tag">update_plan<span class="count">820</span></div>
+          
+            <div class="tool-tag">mcp__playwright__browser_run_code<span class="count">654</span></div>
+          
+            <div class="tool-tag">wait_agent<span class="count">626</span></div>
+          
+            <div class="tool-tag">close_agent<span class="count">540</span></div>
+          
+            <div class="tool-tag">request_user_input<span class="count">332</span></div>
+          
+        </div>
+      </div>
+    </div>
+    
+    <!-- Key Insights -->
+    <div class="section">
+      <div class="section-header">
+        <h2>💡 Key Insights</h2>
+      </div>
+      <div class="section-body">
+        <ul class="insights-list">
+          <li>Most active day: <strong>2026-03-31</strong> with 67 sessions</li>
+          <li>Most used model: <strong>Unknown</strong></li>
+          <li>Average messages per session: <strong>57.2</strong></li>
+          <li>Structured log sessions: <strong>532</strong> (modern format)</li>
+          <li>Most common working directory: <strong>zayd wtf</strong></li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Session List -->
+    <div class="section">
+      <div class="section-header">
+        <h2>📋 Recent Sessions</h2>
+        <span class="badge badge-green">567 parsed</span>
+      </div>
+      <div class="section-body">
+        <div class="session-list">
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>session_index</h3>
+                <div class="session-meta">
+                  4/2/2026, 12:18:58 PM • 
+                  📁 No project • 
+                  Unknown model •
+                  <span class="badge badge-orange">Legacy</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">0</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">0</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">< 1s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Assess CLIProxyAPI fit</h3>
+                <div class="session-meta">
+                  4/2/2026, 12:12:30 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">16</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">19</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">8h 39m</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Assess CLIProxyAPI fit</h3>
+                <div class="session-meta">
+                  4/2/2026, 12:12:30 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">16</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">19</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">8h 39m</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Fix one-time login flow</h3>
+                <div class="session-meta">
+                  4/2/2026, 5:54:22 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">62</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">82</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">6h 18m</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Fix one-time login flow</h3>
+                <div class="session-meta">
+                  4/2/2026, 5:54:22 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">62</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">82</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">6h 18m</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>rollout-2026-04-01T18-05-12-019d4bb9-10ca-7f90-8750-c111bf29c046</h3>
+                <div class="session-meta">
+                  4/1/2026, 6:05:12 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">8</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">4</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">51s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>rollout-2026-04-01T18-05-12-019d4bb9-10ca-7f90-8750-c111bf29c046</h3>
+                <div class="session-meta">
+                  4/1/2026, 6:05:12 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">8</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">4</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">51s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Consolidate Hydra to one port</h3>
+                <div class="session-meta">
+                  4/1/2026, 6:01:47 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">11</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">5</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">5m 4s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Consolidate Hydra to one port</h3>
+                <div class="session-meta">
+                  4/1/2026, 6:01:47 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">11</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">5</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">5m 4s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review end-to-end coherence</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:56:09 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">9</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">39</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">7m 54s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review end-to-end coherence</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:56:09 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">9</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">39</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">7m 54s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Update space UI docs</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:48:33 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">37</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">6m 14s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Update space UI docs</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:48:33 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">37</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">6m 14s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit batch concurrency</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:45:29 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">16</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">50</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">13m 19s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit batch concurrency</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:45:29 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">16</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">50</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">13m 19s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Slow asteroids and top strip</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:34:38 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">25</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">20m 44s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Slow asteroids and top strip</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:34:38 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">25</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">20m 44s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review auth setup flow</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:28:23 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">19</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 37s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review auth setup flow</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:28:23 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">19</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 37s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Restart server and fix keys</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:01:43 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">40</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">66</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">53m 4s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Restart server and fix keys</h3>
+                <div class="session-meta">
+                  4/1/2026, 5:01:43 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">40</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">66</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">53m 4s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Find error access patterns</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:48:42 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">7</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">24</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 17s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Find error access patterns</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:48:42 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">7</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">24</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 17s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit backend reset paths</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:48:38 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">15</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">20</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">2m 10s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit backend reset paths</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:48:38 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">15</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">20</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">2m 10s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review auth error handling</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:48:35 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">7</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">14</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">51s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review auth error handling</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:48:35 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">7</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">14</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">51s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Refine implementation plan</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:47:02 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">8</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">32</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">3m 58s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Refine implementation plan</h3>
+                <div class="session-meta">
+                  4/1/2026, 4:47:02 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">8</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">32</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">3m 58s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Clean up encryption wiring</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:59:42 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">96</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">110</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">19m 52s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Clean up encryption wiring</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:59:42 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">96</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">110</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">19m 52s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit Hydra wiring</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:59:24 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">40</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">91</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">50m 26s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit Hydra wiring</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:59:24 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">40</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">91</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">50m 26s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Final hardening pass</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:57:44 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">22</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">20</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">48m 4s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Final hardening pass</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:57:44 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">22</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">20</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">48m 4s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Hardening edge-case audit</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:57:09 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">87</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">52m 3s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Hardening edge-case audit</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:57:09 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">38</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">87</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">52m 3s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit Hydra edge cases</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:56:08 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">34</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">102</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">53m 51s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Audit Hydra edge cases</h3>
+                <div class="session-meta">
+                  4/1/2026, 3:56:08 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">34</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">102</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">53m 51s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Fix db errors and icons</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:11:52 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">22</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">55</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">6m 22s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Fix db errors and icons</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:11:52 PM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">22</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">55</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">6m 22s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>rollout-2026-04-01T02-29-10-019d4860-1837-74d0-b08e-94f3d8a9c511</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:29:10 AM • 
+                  📁 zayd wtf • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">15</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">2</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">11h 42m</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>rollout-2026-04-01T02-29-10-019d4860-1837-74d0-b08e-94f3d8a9c511</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:29:10 AM • 
+                  📁 zayd wtf • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">15</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">2</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">11h 42m</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Fix scrollbar and header info</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:27:24 AM • 
+                  📁 zayd wtf • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">23</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">49</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">4m 21s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Fix scrollbar and header info</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:27:24 AM • 
+                  📁 zayd wtf • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">23</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">49</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">4m 21s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Wire pool status reload</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:13:12 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">21</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">10</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 25s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Wire pool status reload</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:13:12 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">21</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">10</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 25s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review pool proxy plan</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:11:38 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">13</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">21</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 57s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Review pool proxy plan</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:11:38 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">13</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">21</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 57s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="session-item">
+              <div class="session-info">
+                <h3>Inspect Pool Manager API</h3>
+                <div class="session-meta">
+                  4/1/2026, 2:11:38 AM • 
+                  📁 hydra • 
+                  Unknown model •
+                  <span class="badge badge-purple">Structured</span>
+                </div>
+              </div>
+              <div class="session-stats">
+                <div class="session-stat">
+                  <div class="value">15</div>
+                  <div class="label">Messages</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">18</div>
+                  <div class="label">Tools</div>
+                </div>
+                <div class="session-stat">
+                  <div class="value">1m 40s</div>
+                  <div class="label">Duration</div>
+                </div>
+              </div>
+            </div>
+          
+        </div>
+        
+          <div class="empty-state">
+            <p>... and 517 more sessions</p>
+          </div>
+        
+      </div>
+    </div>
+    
+    <!-- Errors Section -->
+    
+    
+    <!-- Data Discovery -->
+    <div class="section">
+      <div class="section-header">
+        <h2>🔍 Data Discovery Summary</h2>
+      </div>
+      <div class="section-body">
+        <ul class="insights-list">
+          <li>Codex home directory: <code>~/.codex/</code></li>
+          <li>Session files found: <strong>567</strong></li>
+          <li>Archived sessions: <strong>90</strong></li>
+          <li>Active sessions: <strong>442</strong></li>
+          <li>Total data size: <strong>1.57 GB</strong></li>
+          
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Activity Chart
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+      type: 'line',
+      data: {
+        labels: ["2025-11-24","2025-11-25","2025-11-26","2025-11-27","2025-11-30","2025-12-02","2025-12-03","2025-12-23","2026-01-13","2026-01-14","2026-02-03","2026-02-24","2026-02-25","2026-02-26","2026-02-28","2026-03-03","2026-03-05","2026-03-15","2026-03-16","2026-03-17","2026-03-18","2026-03-21","2026-03-23","2026-03-24","2026-03-25","2026-03-26","2026-03-30","2026-03-31","2026-04-01","2026-04-02"],
+        datasets: [{
+          label: 'Sessions',
+          data: [4,2,2,2,4,6,2,2,2,2,33,6,6,6,12,2,2,10,2,6,44,2,2,2,56,20,2,67,56,21],
+          borderColor: '#58a6ff',
+          backgroundColor: 'rgba(88, 166, 255, 0.1)',
+          tension: 0.4,
+          fill: true
+        }, {
+          label: 'Messages',
+          data: [52,334,238,26,1398,470,18,16,72,20,0,578,272,870,718,10,110,1104,472,906,6092,430,346,90,5100,376,14,3722,1732,512],
+          borderColor: '#3fb950',
+          backgroundColor: 'rgba(63, 185, 80, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: '#e6edf3' } }
+        },
+        scales: {
+          x: { ticks: { color: '#7d8590' }, grid: { color: '#30363d' } },
+          y: { ticks: { color: '#7d8590' }, grid: { color: '#30363d' } }
+        }
+      }
+    });
+    
+    // Tools Chart
+    const toolsCtx = document.getElementById('toolsChart').getContext('2d');
+    new Chart(toolsCtx, {
+      type: 'bar',
+      data: {
+        labels: ["exec_command","shell","shell_command","write_stdin","spawn_agent","update_plan","mcp__playwright__browser_run_code","wait_agent","close_agent","request_user_input"],
+        datasets: [{
+          label: 'Calls',
+          data: [17474,16146,3702,1464,1022,820,654,626,540,332],
+          backgroundColor: ['#58a6ff', '#3fb950', '#a371f7', '#d29922', '#f85149', '#79c0ff', '#56d364', '#d2a8ff'],
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { ticks: { color: '#7d8590' }, grid: { color: '#30363d' } },
+          y: { ticks: { color: '#7d8590' }, grid: { color: '#30363d' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

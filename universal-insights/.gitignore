@@ -1,0 +1,26 @@
+# Research and audit documents (local only)
+AUDIT_PROMPT.md
+EXACT_IMPLEMENTATION.md
+GAP_ANALYSIS.md
+IMPLEMENTATION_ROADMAP.md
+PROJECT_SUMMARY.md
+cursor-agent-docs-research.md
+cursor-agent-research.md
+
+# Cached source files
+cached-source/
+
+# Generated reports (Plan B - will be regenerated)
+reports/
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Cache
+cache/
+*.cache
+
+# Environment
+.env
+.env.local

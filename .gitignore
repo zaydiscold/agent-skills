@@ -13,6 +13,5 @@ skills/universal-insights/
 .vscode/
 .idea/
 
-# Internal hermes skills (not public)
-skills/hermes/
+# Note: skills/hermes/ contains hermes-memory-optimization (public skill)
 

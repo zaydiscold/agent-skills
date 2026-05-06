@@ -15,3 +15,8 @@ skills/universal-insights/
 
 # Note: skills/hermes/ contains hermes-memory-optimization (public skill)
 
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo

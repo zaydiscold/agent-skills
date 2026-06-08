@@ -1,33 +1,85 @@
-# Personal AI Agent Skills Catalog
+# Agent Skills Catalog
 
-A canonical source of truth for my personal AI agent skills. This is a **Monorepo Catalog** designed for one-click installation across all agent environments (Google Gemini Antigravity, Claude Code, Cursor/Cline).
+A single source of truth for my personal AI agent skills — one repo, one folder per skill, installable anywhere.
 
-All skills follow the [Anthropic Skill Authoring Guidelines](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) (Conciseness, Progressive Disclosure, Exacting Triggers).
+Every skill lives in [`skills/`](./skills) as a self-contained folder with its own `SKILL.md`, and follows the [Anthropic Skill Authoring Guidelines](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) (conciseness, progressive disclosure, exacting triggers). Works across Claude Code, Cursor/Cline, and Google Gemini Antigravity.
 
-## Available Skills
+## Available skills
 
-| Skill | Description | Upstream Source |
-|-------|-------------|-----------------|
-| **`bird`** | Twitter/X CLI integration. Read timelines, search, and safely execute write actions with preflight Safari auth fallbacks. | [bird-skill](https://github.com/zaydiscold/bird-skill) |
-| **`last365days`** | A persistent research tracker. Searches Reddit, X, YouTube, TikTok, Polymarket, and the web, and compiles a running historical timeline per topic. | [last365days-skill](https://github.com/zaydiscold/last365days-skill) |
-| **`nasa-coding-standards`** | Complete auditor and auto-refactor agent for NASA JPL's "Power of 10" safety-critical coding rules (supports C/C++ and interpreted languages). | [nasa-coding-standards-skill](https://github.com/zaydiscold/nasa-coding-standards-skill) |
-| **`codex-orchestrator-antigravity`** | Antigravity wrapper for `codex-orchestrator`. Spawns parallel Codex read/write agents via tmux to handle entire product pipelines. | [codex-orchestrator-antigravity-skill](https://github.com/zaydiscold/codex-orchestrator-antigravity-skill) |
+| Skill | What it does | Upstream |
+|-------|--------------|----------|
+| [`bird`](./skills/bird) | Read, search, and browse Twitter/X from any agent via the `bird` CLI — paste an x.com link and it reads it directly. | [bird-skill](https://github.com/zaydiscold/bird-skill) |
+| [`codex-orchestrator-antigravity`](./skills/codex-orchestrator-antigravity) | Orchestrate parallel OpenAI Codex CLI agents over tmux for multi-step coding pipelines and agent-swarm execution. | [codex-orchestrator-antigravity-skill](https://github.com/zaydiscold/codex-orchestrator-antigravity-skill) |
+| [`electron-app-development`](./skills/electron-app-development) | End-to-end Electron desktop expertise — architecture, security (contextBridge/IPC/fuses), packaging, code signing, notarization, and auto-update across mac/Windows/Linux. | _original_ |
+| [`hermes-memory-optimization`](./skills/hermes-memory-optimization) | Tighten Hermes agent memory (`MEMORY.md` / `USER.md`) through signal-vs-noise analysis and structured user interviews. | _original_ |
+| [`last365days`](./skills/last365days) | Persistent long-term research tracker — builds dated Markdown timelines per topic/person across Reddit, X, YouTube, TikTok, Polymarket, and the web. | [last365days-skill](https://github.com/zaydiscold/last365days-skill) |
+| [`nasa-coding-standards`](./skills/nasa-coding-standards) | Audit and auto-refactor code against NASA JPL's "Power of 10" safety-critical rules (C/C++, Python, JS, TS, Go). | [nasa-coding-standards-skill](https://github.com/zaydiscold/nasa-coding-standards-skill) |
+| [`skillception`](./skills/skillception) | The meta-skill — author, refactor, and audit agent skills (Claude Code, Agent SDK, Codex, Cursor, Antigravity, Hermes) the right way. | _original_ |
 
-## Quick Install across all platforms
+## Install
 
-Clone this repo once, and the included script will symlink the entire catalog to all 3 agent platforms simultaneously.
+### Option A — `npx skills` (zero setup, recommended)
+
+Add the whole catalog to every agent on your machine:
 
 ```bash
-git clone https://github.com/zaydiscold/agent-skills.git ~/Desktop/agent-skills
-cd ~/Desktop/agent-skills
-bash docs/install-skills.txt
+npx skills add zaydiscold/agent-skills --all
 ```
 
-This will automatically link to:
-- `~/.agents/skills/` (Base tracking for Cursor)
-- `~/.claude/skills/` (Claude Code)
-- `~/.gemini/antigravity/skills/` (Google Gemini Antigravity)
+…or just one skill:
 
-## Why a Monorepo?
+```bash
+npx skills add zaydiscold/agent-skills --skill bird
+```
 
-While skills are individually developed and maintained in their standalone Repositories (for clean independent sharing), they are aggregated here. This ensures that a new Macbook can instantly inherit all intelligence capabilities via a single git clone.
+### Option B — clone + symlink
+
+Clone once and let the installer symlink every skill into whichever agent
+directories you already have. Symlinks mean a future `git pull` updates every
+agent at once.
+
+```bash
+git clone https://github.com/zaydiscold/agent-skills.git
+cd agent-skills
+bash install.sh
+```
+
+`install.sh` flags:
+
+| Command | Targets |
+|---------|---------|
+| `bash install.sh` | every agent dir that already exists |
+| `bash install.sh --claude` | Claude Code (`~/.claude/skills`) |
+| `bash install.sh --cursor` | Cursor / base (`~/.agents/skills`) |
+| `bash install.sh --antigravity` | Gemini Antigravity (`~/.gemini/antigravity/skills`) |
+| `bash install.sh --all` | creates + links into all three |
+
+Re-running is safe: existing symlinks are refreshed, and real directories you
+placed yourself are never overwritten.
+
+## Repo layout
+
+```
+agent-skills/
+├── skills/
+│   ├── bird/                          SKILL.md + references/
+│   ├── codex-orchestrator-antigravity/
+│   ├── electron-app-development/
+│   ├── hermes-memory-optimization/
+│   ├── last365days/
+│   ├── nasa-coding-standards/
+│   └── skillception/
+├── install.sh                         symlink installer
+├── ideas.md                           skill backlog
+└── README.md
+```
+
+Every skill folder is independently valid: drop any one of them into a
+`skills/` directory on its own and it works.
+
+## Why a monorepo?
+
+Several of these skills are also maintained as standalone repos (see the
+**Upstream** column) for clean, independent sharing. Aggregating them here means
+a fresh machine inherits the entire toolkit from a single `git clone` — and a
+single `git pull` keeps every agent in sync.

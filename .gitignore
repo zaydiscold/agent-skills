@@ -4,16 +4,14 @@ node_modules/
 temp/
 *.tmp
 
-# Private skills - keep local only
-zayds-security-toolkit/
+# Private skills - present on disk, never published
+skills/zayds-security-toolkit/
 skills/universal-insights/
 
 # IDE/Editor metadata
 .cursor/
 .vscode/
 .idea/
-
-# Note: skills/hermes/ contains hermes-memory-optimization (public skill)
 
 
 # Python cache

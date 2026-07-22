@@ -1,0 +1,48 @@
+{
+  "_comment": "Structured return for ONE critic agent. Pass this as the `schema` to each critic so its report is consistent and machine-comparable at synthesis. The synthesis stage reads many of these and looks for convergence (fact) vs divergence (a fork).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lens", "read", "keep", "remove", "change", "add", "biggestFlaw", "biggestOpportunity", "verdict"],
+  "properties": {
+    "lens": {
+      "type": "string",
+      "description": "this critic's point of view, e.g. 'ruthless editor' or 'security auditor'"
+    },
+    "read": {
+      "type": "string",
+      "description": "what the artifact actually IS, experienced cold from THIS lens — honest, specific, the felt/observed truth, not a summary"
+    },
+    "keep": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "the few things that are genuinely good/correct/beautiful and must NOT be touched — cite specifics"
+    },
+    "remove": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "specific cuts, ranked by impact — quote the actual line/element/function and give a one-line why. be ruthless"
+    },
+    "change": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "specific alterations (copy, color, weight, order, timing, naming, structure, severity for bugs) — NOT additions"
+    },
+    "add": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "only where the artifact is GENUINELY thin — a real gap, not 'more features'. usually short or empty; bias hard against adding"
+    },
+    "biggestFlaw": {
+      "type": "string",
+      "description": "the single worst problem from this lens"
+    },
+    "biggestOpportunity": {
+      "type": "string",
+      "description": "the one move that would most raise this artifact — a subtraction is a valid and often best answer"
+    },
+    "verdict": {
+      "type": "string",
+      "description": "one or two sentences: the honest bottom line from this lens"
+    }
+  }
+}

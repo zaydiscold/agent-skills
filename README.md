@@ -9,6 +9,7 @@ Every skill lives in [`skills/`](./skills) as a self-contained folder with its o
 | Skill | What it does | Upstream |
 |-------|--------------|----------|
 | [`bird`](./skills/bird) | Read, search, and browse Twitter/X from any agent via the `bird` CLI — paste an x.com link and it reads it directly. | [bird-skill](https://github.com/zaydiscold/bird-skill) |
+| [`chembl-bioactivity-audit`](./skills/chembl-bioactivity-audit) | Query ChEMBL for measured bioactivity on a drug-design target — clinical-stage hits, Kd/Ki benchmarks, phospholipidosis flags, and alternative chemotypes with real binding data. | _original_ |
 | [`codex-orchestrator-antigravity`](./skills/codex-orchestrator-antigravity) | Orchestrate parallel OpenAI Codex CLI agents over tmux for multi-step coding pipelines and agent-swarm execution. | [codex-orchestrator-antigravity-skill](https://github.com/zaydiscold/codex-orchestrator-antigravity-skill) |
 | [`critique`](./skills/critique) | Multi-perspective critique of anything in any scope — spawns independent critic agents (code-autist, security, PM/delivery, adversarial red-team, design, logician, editor, pre-mortem…), each writes a structured report, then synthesizes consensus-vs-tension into one verdict: add / remove / change / keep. | _original_ |
 | [`electron-app-development`](./skills/electron-app-development) | End-to-end Electron desktop expertise — architecture, security (contextBridge/IPC/fuses), packaging, code signing, notarization, and auto-update across mac/Windows/Linux. | _original_ |
@@ -66,6 +67,7 @@ placed yourself are never overwritten.
 agent-skills/
 ├── skills/
 │   ├── bird/                          SKILL.md + references/
+│   ├── chembl-bioactivity-audit/      SKILL.md
 │   ├── codex-orchestrator-antigravity/
 │   ├── critique/                       SKILL.md + references/
 │   ├── electron-app-development/

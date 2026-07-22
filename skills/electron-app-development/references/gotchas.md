@@ -168,3 +168,25 @@ Hard-won lessons from packaging an Express + Prisma + React app as an Electron d
 
 - **`npm run electron:build` fails with `which python` exit 1** if your machine has `python3` but no `python` alias. electron-builder's `install-app-deps` shells out to `which python` directly. Fix at the project level: `npm config set python /opt/homebrew/bin/python3`. Don't symlink `python3 → python` system-wide unless you want every other tool that hard-codes `python` to also start working — that has its own consequences.
 
+### Wiring patterns learned in production
+
+- **IPC handlers should read state directly, not accept callback args.** A common footgun: `registerIpcHandlers({ onHideWindow, onQuitApp })` — and `main.js` later calls `registerIpcHandlers()` with no args. Every IPC silently returns `{ ok: false, code: 'NO_HANDLER' }` because the closure captured `undefined`. Have the IPC module import the state singleton (mainWindow ref, forceQuit setter) directly. Wiring becomes uniform and impossible to forget.
+
+- **`window.close()` from the renderer bypasses the full shutdown chain.** It only triggers the BrowserWindow `close` event; `before-quit → graceful-shutdown → app.exit` does NOT fire, so child processes and DB connections leak. Expose a `native:quit-app` IPC that does `setForceQuit(true); app.quit();` and route renderer "Quit" buttons through it.
+
+- **`ipcRenderer.on('foo', cb)` listeners need an off-channel.** Without exposing an `offX(wrapped)` remover, `useEffect(() => onX(cb), [])` accumulates a fresh listener on every component remount → memory leak + duplicate fires. Pattern: preload's `onX` returns the wrapped listener fn, exposes `offX(wrapped)` alongside, renderer wrapper returns an unsubscribe so the `useEffect` cleanup calls `removeListener`.
+
+- **First-run pref defaulting needs an `isExplicitlySet()` check.** "Auto-enable feature X if device supports it" must NEVER override an explicit user opt-out from a prior launch. Distinguish "key absent from prefs file" (set the default once) from "key present, value=false" (user said no, leave it). Strip default-equal entries on write so the file stays compact.
+
+- **Auto-detect & enable platform-native features on first launch when the security cost is zero.** When a feature is purely a UX gate over something that already exists (e.g. biometric unlock over a stored token), don't force the user to hunt through Settings. Probe capability at boot, set the pref ONCE if it's never been set, document the behavior so users aren't surprised. Pair with the `isExplicitlySet()` rule above.
+
+- **Splash duration must lock-step across the JS gate AND the CSS keyframe.** If the renderer's `animation: fillbar 7s` doesn't match `SPLASH_MIN_VISIBLE_MS = 7000` in main, the user sees a half-full progress bar for one frame before the splash dismisses. Reference one numeric constant from both places with a doc-comment "must match" warning.
+
+- **Embed your local server with explicit `bootstrap()` + `gracefulShutdown()` exports**, never a top-level `app.listen()` at module-evaluation time. The main process needs to own port selection (random `port: 0` in packaged builds; preferred port + EADDRINUSE fallback in dev) and call `gracefulShutdown({ exit: false })` so closing the server doesn't kill the whole Electron process. Keep a separate `standalone.js` for terminal use that imports + calls bootstrap.
+
+- **`afterSign` hooks must no-op without credentials, not fail the build.** Contributors and CI without signing certs still need a working unsigned local build. Pattern: `if (!process.env.APPLE_ID) { console.warn('skipping notarize'); return; }`. Provide a `*_SKIP_NOTARIZE=1` env var to silence the warning. The unsigned `.app` runs fine locally; only distribution requires the full chain.
+
+- **Telemetry SDKs must scrub PII via serialize-replace-deserialize, not field-by-field.** Whatever SDK you use (Sentry, Bugsnag, custom), the `beforeSend(event)` hook should JSON-stringify the entire event, regex-replace known token patterns (`Bearer …`, vendor-specific keys, session cookie names, the user's home-directory prefix), then JSON-parse back. Touching only known fields misses breadcrumbs, request URLs, and nested arrays. Drop the event entirely if the round-trip throws — never risk leaking on a serialization edge case.
+
+- **Platform biometrics (Touch ID / Windows Hello) — prefer the platform's built-in API.** On macOS, `systemPreferences.canPromptTouchID()` + `systemPreferences.promptTouchID(reason)` ship with Electron core, no native rebuild. Windows Hello does need an external package (`windows-hello` or `UserConsentVerifier` direct). Linux has no first-party biometric API — fall back to password-only and tell the user. Distinguish error codes (cancelled vs. unavailable vs. failed) so the UI can choose copy intelligently.
+

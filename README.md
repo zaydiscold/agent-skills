@@ -16,6 +16,7 @@ Every skill lives in [`skills/`](./skills) as a self-contained folder with its o
 | [`jane-street-house-style`](./skills/jane-street-house-style) | Audit and refactor code to Jane Street's house style — correctness-by-types, "make illegal states unrepresentable", errors-as-values, brevity. Literal OCaml rules (Base/Core, `.mli`, `[@@deriving]`, `ppx_js_style`, ocamlformat) with a `/jane` command; ported principles for TS/Rust/Python/Go. | _original_ |
 | [`last365days`](./skills/last365days) | Persistent long-term research tracker — builds dated Markdown timelines per topic/person across Reddit, X, YouTube, TikTok, Polymarket, and the web. | [last365days-skill](https://github.com/zaydiscold/last365days-skill) |
 | [`nasa-coding-standards`](./skills/nasa-coding-standards) | Audit and auto-refactor code against NASA JPL's "Power of 10" safety-critical rules (C/C++, Python, JS, TS, Go). | [nasa-coding-standards-skill](https://github.com/zaydiscold/nasa-coding-standards-skill) |
+| [`screenie`](./skills/screenie) | View the most recent macOS screenshot without a path — say "screenie" / "sc" and the agent finds the newest grab in `~/Pictures/Screenshots` (HEIC→PNG) and looks at it. | _original_ |
 | [`skillception`](./skills/skillception) | The meta-skill — author, refactor, and audit agent skills (Claude Code, Agent SDK, Codex, Cursor, Antigravity, Hermes) the right way. | _original_ |
 
 ## Install
@@ -72,6 +73,7 @@ agent-skills/
 │   ├── jane-street-house-style/       SKILL.md + references/ + /jane command
 │   ├── last365days/
 │   ├── nasa-coding-standards/
+│   ├── screenie/                       SKILL.md
 │   └── skillception/
 ├── install.sh                         symlink installer
 ├── ideas.md                           skill backlog

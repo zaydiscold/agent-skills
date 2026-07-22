@@ -12,6 +12,7 @@ Every skill lives in [`skills/`](./skills) as a self-contained folder with its o
 | [`codex-orchestrator-antigravity`](./skills/codex-orchestrator-antigravity) | Orchestrate parallel OpenAI Codex CLI agents over tmux for multi-step coding pipelines and agent-swarm execution. | [codex-orchestrator-antigravity-skill](https://github.com/zaydiscold/codex-orchestrator-antigravity-skill) |
 | [`electron-app-development`](./skills/electron-app-development) | End-to-end Electron desktop expertise — architecture, security (contextBridge/IPC/fuses), packaging, code signing, notarization, and auto-update across mac/Windows/Linux. | _original_ |
 | [`hermes-memory-optimization`](./skills/hermes-memory-optimization) | Tighten Hermes agent memory (`MEMORY.md` / `USER.md`) through signal-vs-noise analysis and structured user interviews. | _original_ |
+| [`jane-street-house-style`](./skills/jane-street-house-style) | Audit and refactor code to Jane Street's house style — correctness-by-types, "make illegal states unrepresentable", errors-as-values, brevity. Literal OCaml rules (Base/Core, `.mli`, `[@@deriving]`, `ppx_js_style`, ocamlformat) with a `/jane` command; ported principles for TS/Rust/Python/Go. | _original_ |
 | [`last365days`](./skills/last365days) | Persistent long-term research tracker — builds dated Markdown timelines per topic/person across Reddit, X, YouTube, TikTok, Polymarket, and the web. | [last365days-skill](https://github.com/zaydiscold/last365days-skill) |
 | [`nasa-coding-standards`](./skills/nasa-coding-standards) | Audit and auto-refactor code against NASA JPL's "Power of 10" safety-critical rules (C/C++, Python, JS, TS, Go). | [nasa-coding-standards-skill](https://github.com/zaydiscold/nasa-coding-standards-skill) |
 | [`skillception`](./skills/skillception) | The meta-skill — author, refactor, and audit agent skills (Claude Code, Agent SDK, Codex, Cursor, Antigravity, Hermes) the right way. | _original_ |
@@ -66,6 +67,7 @@ agent-skills/
 │   ├── codex-orchestrator-antigravity/
 │   ├── electron-app-development/
 │   ├── hermes-memory-optimization/
+│   ├── jane-street-house-style/       SKILL.md + references/ + /jane command
 │   ├── last365days/
 │   ├── nasa-coding-standards/
 │   └── skillception/

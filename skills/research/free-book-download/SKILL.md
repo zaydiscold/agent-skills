@@ -1,16 +1,22 @@
 ---
 name: free-book-download
 description: Download free books from OceanofPDF, Libgen, and Z-Library.
-version: 1.0.0
+version: 1.1.0
 platforms: [windows, macos, linux]
+metadata:
+  hermes:
+    tags: [books, download, pdf, epub, oceanofpdf, duckduckgo, library-genesis, gutenberg, standardebooks]
 ---
+
 # Free Book Download — OceanofPDF & Alternatives
 
 Practical workflow for downloading books for personal use from free book sites, using DuckDuckGo search because Google actively removes/blocks free-book results.
 
+**Tested 2026-08-04 against real books from to-read shelf.** Verified: DuckDuckGo search, Gutenberg, Standard Ebooks, Scrapling HTTP fetcher. Known gap: OceanofPDF's managed Cloudflare Turnstile is too aggressive for headless Scrapling — requires real browser + CUA.
+
 ## When to use
 - User wants to download a book (PDF/EPUB) for free
-- OceanofPDF, PDFRoom, Lien.IS, Library Genesis, Z-Library, PDFDrive, Standard Ebooks
+- OceanofPDF, PDFRoom, Lien.IS, Library Genesis, Z-Library, PDFDrive, Standard Ebooks, Project Gutenberg
 - Google search returns nothing / blocked results for a book + "pdf download"
 
 ## Core principle: DuckDuckGo first
@@ -21,17 +27,15 @@ Google removes free-book piracy results and shows "results removed" notices. **D
 ```bash
 # Direct HTML search (no API key needed)
 curl -s "https://html.duckduckgo.com/html/?q=site%3Aoceanofpdf.com+%22BOOK+TITLE%22" \
-  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-
-# Lite endpoint (lighter page)
-curl -s "https://lite.duckduckgo.com/lite/?q=BOOK+TITLE+pdf+download"
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 ```
 
-In Python, parse the HTML for `result__a` links (DuckDuckGo wraps target URLs in `uddg=` params):
+In Python, parse the HTML for `uddg=` params:
 ```python
 import re, urllib.parse, urllib.request
 
 def ddg_search(query):
+    """DuckDuckGo HTML search. Returns list of result URLs."""
     q = urllib.parse.quote(query)
     req = urllib.request.Request(
         f"https://html.duckduckgo.com/html/?q={q}",
@@ -47,107 +51,124 @@ def ddg_search(query):
 - `"BOOK TITLE" pdf download` — general
 - `"BOOK TITLE" epub "AUTHOR"` — EPUB focus
 - `"BOOK TITLE" filetype:pdf` — filetype operator
-- For web_search: `site:oceanofpdf.com "BOOK TITLE"` works (agent web search is not Google)
 
-## OceanofPDF download flow
+## Source priority order (tested reliability)
 
-OceanofPDF is behind **Cloudflare Turnstile** ("Just a moment..."). Direct curl/wget will be blocked. Use the browser tools.
+### 1. Project Gutenberg — fastest, most reliable
+No bot protection, no Cloudflare. Public domain only. Use for any classic work.
 
-### URL structure
-```
-https://oceanofpdf.com/authors/<author-slug>/pdf-<book-slug>-download/
-https://oceanofpdf.com/category/authors/<author>/   # author archive
-https://oceanofpdf.com/?s=<search>                   # site search
-```
-
-### Download steps (browser)
-1. **Search**: Navigate to `https://oceanofpdf.com/?s=BOOK+TITLE` OR use DuckDuckGo to find the exact book page URL.
-2. **Book page**: Navigate to the book's download page. Scroll to find the download section.
-3. **Cloudflare challenge**: If "Just a moment..." appears, wait 5-10s for auto-solve, or take a screenshot to inspect visually. Use computer-use/CUA tools to click the Turnstile checkbox if needed.
-4. **Download link**: Click the blue "Download" button (not ad banners).
-5. **Save**: PDF/EPUB downloads. Verify the file (1-50 MB real book, <50 KB = fake).
-
-### Alternative: prefer search-first
-Find the exact book URL via DuckDuckGo first, then open it directly. Often skips the homepage challenge.
-
-## Alternative sources (by reliability)
-
-**Primary backups (Zayd's tracked LibGen mirror set — from `zaydiscold/book-review-tracker`):**
-Use these as the fallback catalog after OceanofPDF. The tracker's `LIBGEN_API.md` documents the full LibGen integration (search/filter/download) and its `docs/assets/*.js` carries the live mirror list.
-
-| Source | URL | Notes |
-|--------|-----|-------|
-| LibGen main | `libgen.li` | Tracker's primary catalog mirror |
-| LibGen fiction/catalog | `libgen.rs` / `libgen.st` / `libgen.gs` / `libgen.lc` | Alternate catalog mirrors |
-| LibGen (README routes) | `libgen.bz` / `libgen.vg` | The 3 visible routes in the tracker live site |
-| LibGen download mirror | `library.lol` | Direct file host; `download.library.lol` |
-| LibGen legacy | `libgen.is` | Old default, may be down |
-| Anna's Archive | `en.annas-archive.org`/`annas-archive.org` | Aggregates LibGen + Z-Library + Sci-Hub; `en.` subdomain used by tracker |
-| LibGen Tor | `libgenfrialc7t...onion` | Onion mirror for privacy (via Tor) |
-
-**LibGen download URL pattern (from tracker):**
-```
-getDownloadUrl(md5, mirror) => `${mirror}/book/index.php?md5=${md5.toLowerCase()}`
-```
-Search pattern: `GET ${mirror}/index.php?req=<query>&columns[]=t&objects[]=f&topics[]=l`
-The tracker's `getMirror()` probes for the fastest responding mirror; libgen.is is the code fallback.
-
-| Source | URL | Auth | Format | Notes |
-|--------|-----|------|--------|-------|
-| Anna's Archive | `annas-archive.org` | None | All | Aggregates LibGen + Z-Library + Sci-Hub |
-| Z-Library | `z-lib.io` / `z-lib.id` | Free account | All | Download limit w/o account |
-| PDFRoom | `pdfroom.com` | None | PDF | Less Cloudflare than OceanofPDF |
-| PDFDrive | `pdfdrive.com` | None | PDF/EPUB | Good for fiction/self-help |
-| Lien.IS | `lien.is` | None | PDF | Small library, minimal bot detection |
-| Standard Ebooks | `standardebooks.org` | None | EPUB | Public domain, high quality |
-| Project Gutenberg | `gutenberg.org` | None | EPUB/Kindle | Public domain classics |
-
-### Library Genesis direct download (most scriptable)
 ```bash
-curl -s "https://libgen.is/index.php?req=BOOK+TITLE&columns%5B%5D=t&objects%5B%5D=f&topics%5B%5D=l" \
+# Search
+curl -s "https://www.gutenberg.org/ebooks/search/?query=AUTHOR+TITLE" \
   -H "User-Agent: Mozilla/5.0"
-# Then download from mirror:
-curl -sL "https://library.lol/main/<MD5_HASH>" -o book.pdf \
-  -H "User-Agent: Mozilla/5.0"
+
+# Download plain text UTF-8
+curl -sL "https://www.gutenberg.org/cache/epub/60333/pg60333.txt" -o book.txt
+
+# Download EPUB
+curl -sL "https://www.gutenberg.org/ebooks/60333.epub.images" -o book.epub
 ```
 
-### Anna's Archive search
+Gutenberg book IDs are numeric. Find them from search results or the book page URL (`/ebooks/ID`). The `.txt.utf-8` and `.epub.images` download patterns are consistent. **Verified 2026-08-04:** 507KB download of real Kierkegaard text.
+
+### 2. Standard Ebooks — high quality, public domain
+Professionally formatted EPUBs. No bot protection. Titles are slugified: `author/book-title`.
+
 ```bash
-curl -s "https://annas-archive.org/search?q=BOOK+TITLE" \
-  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+# Download EPUB directly (slug may need subtitle appended)
+curl -sL "https://standardebooks.org/ebooks/AUTHOR/BOOK-TITLE/downloads/BOOK-TITLE.epub" \
+  -o book.epub
+
+# If 404, check the page for the actual filename
+curl -s "https://standardebooks.org/ebooks/AUTHOR/BOOK-TITLE" \
+  | grep -oP 'href="[^"]*\.epub"'
 ```
-JSON endpoint: `https://annas-archive.org/search?q=...&output=json`
 
-> **Reuse the tracker engine:** `zaydiscold/book-review-tracker` (`src/backend/services/libgenService.js`) already implements `searchByTitle`, `searchByAuthor`, `getMirror` (fastest-mirror probe), `generateDownloadUrl` (md5 → mirror/book/index.php), and multi-topic search (LIBGEN/FICTION/COMICS/ARTICLES/MAGAZINES). Prefer reusing that logic over re-inventing the LibGen scrape.
+**Tested:** `/soren-kierkegaard/fear-and-trembling` exists (200) but the direct download URL may vary if the title has a subtitle. Always scrape the page for `.epub` links if the direct URL 404s.
 
-## Handling blockers
+### 3. DuckDuckGo + Scrapling HTTP fetcher — for most modern books
+**Tested 2026-08-04:** DuckDuckGo HTML search returns ~40 results per query. For books not in Gutenberg/Standard Ebooks, use the search to find a source, then use Scrapling's HTTP fetcher (lightweight, no browser).
 
-### Cloudflare Turnstile
-1. Navigate to book URL
-2. Wait 5-10s for auto-solve
-3. Take screenshot to check for checkbox
-4. Use computer-use tools to click "Verify you are human" on real Chrome
-5. If persistent, switch to Libgen/PDFRoom (less aggressive protection)
+```python
+# Requires: pip install scrapling
+from scrapling.fetchers import Fetcher
 
-### Fake download buttons
-Ad-banner "Download" buttons are not the real link. The real download button is usually a distinct blue button in the page body.
+# Scrapling's HTTP fetcher handles redirects, cookies, and headers
+page = Fetcher.get('https://example.com/book', timeout=30)
+body = page.body  # raw bytes
+# Or use the response for further scraping
+links = page.css('a::attr(href)').getall()
+```
+
+**Cloudflare note:** Scrapling's `StealthyFetcher` with `solve_cloudflare=True` works for most Cloudflare sites, but **OceanofPDF uses managed Turnstile** which requires a real browser + CUA to click the checkbox.
+
+### 4. Library Genesis — largest catalog, intermittent downtime
+Search via HTTP. The `.is`, `.rs`, `.st`, `.li`, `.gs`, `.lc` mirrors rotate — try another if one is down.
+
+```bash
+# Search
+curl -s "https://libgen.is/index.php?req=BOOK+TITLE&columns%5B%5D=t&objects%5B%5D=f&topics%5B%5D=l"
+
+# Download
+curl -sL "https://library.lol/main/MD5_HASH" -o book.pdf
+```
+
+Note: LibGen is frequently rate-limited or down from US IPs. Try `.gs` or `.li` if `.is` fails.
+
+### 5. Anna's Archive — aggregator, last resort
+Aggregates LibGen + Z-Library + Sci-Hub. Works when individual mirrors are down.
+
+```bash
+curl -s "https://annas-archive.org/search?q=BOOK+TITLE+PDF" \
+  -H "User-Agent: Mozilla/5.0"
+```
+
+### 6. OceanofPDF — requires browser (Cloudflare Turnstile)
+Behind managed Cloudflare Turnstile. Headless tools (curl, Scrapling stealth) will fail after multiple retry attempts. **Must use real browser + CUA to click the checkbox.**
+
+**Tested 2026-08-04 with Scrapling StealthyFetcher:**
+```
+[WARNING] Cloudflare page didn't disappear after 10s, continuing...
+[WARNING] Looks like Cloudflare captcha is still present, solving again
+[ERROR] Page crashed after 3 retry attempts
+```
+
+**Working approach:** Navigate in browser, wait for Turnstile auto-solve, click checkbox if needed, then download.
+
+### 7. Full LibGen mirror set (from zaydiscold/book-review-tracker)
+The tracker's `LIBGEN_API.md` has the full mirror list. Use these as fallback for any book not found elsewhere:
+
+- `libgen.li` — primary catalog
+- `libgen.rs` / `libgen.st` / `libgen.gs` / `libgen.lc` — alternate catalogs
+- `libgen.bz` / `libgen.vg` — README routes
+- `library.lol` — download host
+- `en.annas-archive.org` — aggregated search
 
 ## File verification (MANDATORY)
 ```bash
-file book.pdf          # must say "PDF document"
+# PDF
+file book.pdf          # must say "PDF document"  
 xxd book.pdf | head -1 # must start with %PDF-
 ls -la book.pdf        # 1-50 MB = real; <50 KB = fake
+
+# EPUB
 file book.epub         # must say "EPUB document" / "Zip archive"
+
+# Text (Gutenberg)
+file book.txt          # must say "UTF-8 Unicode text" or "ASCII text"
+wc -l book.txt         # should be 1000+ lines for a real book
 ```
 
 ## Pitfalls
-- **Google blocks free-book results** — always DuckDuckGo first
-- **OceanofPDF is Cloudflare-protected** — browser required, not curl
-- **Mirror domains change** — if libgen.is is down, try .rs/.st/.li
-- **Small file = not the book** — always verify size + magic bytes
-- **Personal-use note** — these sources distribute copyrighted works
+- **Google blocks free-book results** — always DuckDuckGo first (verified: DDG returns 40+ results where Google returns 0)
+- **OceanofPDF Cloudflare** — requires real browser + CUA to click Turnstile. Headless tools fail
+- **LibGen downtime** — try `.gs`, `.li`, `.st` if `.is` is down
+- **Small file = not the book** — always verify size + magic bytes. Real PDFs are 1-50MB, real EPUBs are 200KB-5MB
+- **Smart quotes break search** — replace "fancy quotes" with regular quotes in query strings
+- **Scrapling lxml issue on Windows** — if you get `cannot import name 'etree' from 'lxml'`, run: `/c/Python310/Scripts/pip install --force-reinstall lxml`
+- **Personal-use note** — these sources distribute copyrighted works. Use responsibly
 
 ## Related tools
-- **Browser tools** — navigate Cloudflare-protected book sites, click Turnstile checkboxes
-- **Scrapling** (https://github.com/D4Vinci/Scrapling) — stealth scraping with Cloudflare bypass
-- **book-review-tracker** (https://github.com/zaydiscold/book-review-tracker) — the LibGen mirror set used here comes from this project's LIBGEN_API.md
+- **Scrapling (https://github.com/D4Vinci/Scrapling)** — HTTP fetcher + stealth browser for Cloudflare bypass (tested: HTTP works, OceanofPDF Turnstile needs real browser)
+- **book-review-tracker (https://github.com/zaydiscold/book-review-tracker)** — full LibGen engine with mirror probing and md5 URL generation
+- **Browser CUA tools** — for clicking Cloudflare Turnstile on OceanofPDF

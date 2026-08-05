@@ -2,12 +2,8 @@
 name: free-book-download
 description: Download free books from OceanofPDF, Libgen, and Z-Library.
 version: 1.0.0
-platforms: [windows]
-metadata:
-  hermes:
-    tags: [books, download, pdf, epub, oceanofpdf, duckduckgo, library-genesis]
+platforms: [windows, macos, linux]
 ---
-
 # Free Book Download — OceanofPDF & Alternatives
 
 Practical workflow for downloading books for personal use from free book sites, using DuckDuckGo search because Google actively removes/blocks free-book results.
@@ -51,7 +47,7 @@ def ddg_search(query):
 - `"BOOK TITLE" pdf download` — general
 - `"BOOK TITLE" epub "AUTHOR"` — EPUB focus
 - `"BOOK TITLE" filetype:pdf` — filetype operator
-- For web_search: `site:oceanofpdf.com "BOOK TITLE"` works (Hermes web_search is not Google)
+- For web_search: `site:oceanofpdf.com "BOOK TITLE"` works (agent web search is not Google)
 
 ## OceanofPDF download flow
 
@@ -65,9 +61,9 @@ https://oceanofpdf.com/?s=<search>                   # site search
 ```
 
 ### Download steps (browser)
-1. **Search**: `browser_navigate` to `https://oceanofpdf.com/?s=BOOK+TITLE` OR use DuckDuckGo to find the exact book page URL.
+1. **Search**: Navigate to `https://oceanofpdf.com/?s=BOOK+TITLE` OR use DuckDuckGo to find the exact book page URL.
 2. **Book page**: Navigate to the book's download page. Scroll to find the download section.
-3. **Cloudflare challenge**: If "Just a moment..." appears, wait 5-10s for auto-solve, or use `browser_vision` to inspect. Use computer_use/CUA to click the Turnstile checkbox if needed.
+3. **Cloudflare challenge**: If "Just a moment..." appears, wait 5-10s for auto-solve, or take a screenshot to inspect visually. Use computer-use/CUA tools to click the Turnstile checkbox if needed.
 4. **Download link**: Click the blue "Download" button (not ad banners).
 5. **Save**: PDF/EPUB downloads. Verify the file (1-50 MB real book, <50 KB = fake).
 
@@ -127,10 +123,10 @@ JSON endpoint: `https://annas-archive.org/search?q=...&output=json`
 ## Handling blockers
 
 ### Cloudflare Turnstile
-1. `browser_navigate` to book URL
+1. Navigate to book URL
 2. Wait 5-10s for auto-solve
-3. `browser_vision` to check for checkbox
-4. `computer_use` (CUA) to click "Verify you are human" on real Chrome
+3. Take screenshot to check for checkbox
+4. Use computer-use tools to click "Verify you are human" on real Chrome
 5. If persistent, switch to Libgen/PDFRoom (less aggressive protection)
 
 ### Fake download buttons

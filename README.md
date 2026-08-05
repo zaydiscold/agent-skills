@@ -2,7 +2,7 @@
 
 A single source of truth for my personal AI agent skills — one repo, one folder per skill, installable anywhere.
 
-Every skill lives in [`skills/`](./skills) as a self-contained folder with its own `SKILL.md`, and follows the [Anthropic Skill Authoring Guidelines](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/skills) (conciseness, progressive disclosure, exacting triggers). Works across Claude Code, Cursor/Cline, and Google Gemini Antigravity.
+Every skill lives in [`skills/`](./skills) as a self-contained folder with its own `SKILL.md`, following [Anthropic's skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) (progressive disclosure, succinct triggers, real-tested workflows). Works across Hermes Agent, Claude Code, Cursor, Cline, and any other agent that reads `SKILL.md`.
 
 ## Available skills
 
@@ -55,9 +55,9 @@ bash install.sh
 |---------|---------|
 | `bash install.sh` | every agent dir that already exists |
 | `bash install.sh --claude` | Claude Code (`~/.claude/skills`) |
-| `bash install.sh --cursor` | Cursor / base (`~/.agents/skills`) |
-| `bash install.sh --antigravity` | Gemini Antigravity (`~/.gemini/antigravity/skills`) |
-| `bash install.sh --all` | creates + links into all three |
+| `bash install.sh --cursor` | Cursor / Cline (`~/.agents/skills`) |
+| `bash install.sh --hermes` | Hermes Agent (`~/.hermes/skills`) |
+| `bash install.sh --all` | creates + links into all available |
 
 Re-running is safe: existing symlinks are refreshed, and real directories you
 placed yourself are never overwritten.

@@ -72,6 +72,7 @@ agent-skills/
 │   ├── codex-orchestrator-antigravity/
 │   ├── critique/                       SKILL.md + references/
 │   ├── electron-app-development/
+│   ├── free-book-download/            SKILL.md (under research/)
 │   ├── hermes-memory-optimization/
 │   ├── jane-street-house-style/       SKILL.md + references/ + /jane command
 │   ├── last365days/

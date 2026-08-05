@@ -151,10 +151,7 @@ file book.epub         # must say "EPUB document" / "Zip archive"
 - **Small file = not the book** — always verify size + magic bytes
 - **Personal-use note** — these sources distribute copyrighted works
 
-## Related skills
-| Skill | Use when |
-|-------|----------|
-| `browser/browser` | navigating Cloudflare-protected book sites |
-| `autonomous-ai-agents/computer-use` | clicking Turnstile checkboxes / download buttons |
-| `research/scrapling` | stealth scraping with Cloudflare bypass |
-| `research/free-book-download` | download free books from OceanofPDF, Libgen, Z-Library |
+## Related tools
+- **Browser tools** — navigate Cloudflare-protected book sites, click Turnstile checkboxes
+- **Scrapling** (https://github.com/D4Vinci/Scrapling) — stealth scraping with Cloudflare bypass
+- **book-review-tracker** (https://github.com/zaydiscold/book-review-tracker) — the LibGen mirror set used here comes from this project's LIBGEN_API.md
